@@ -19,45 +19,51 @@
   },
   {
     "id": "profile_coursework",
-    "text": "My relevant coursework includes Data Structures and Algorithms, Object-Oriented Design, Database Management, Software Engineering, and Artificial Intelligence.",
+    "text": "Patrick Tran's relevant coursework includes Data Structures and Algorithms, Object-Oriented Design, Database Management, Software Engineering, and Artificial Intelligence.",
     "category": "profile",
     "metadata": {"type": "education", "area": "coursework"}
   },
   {
     "id": "profile_skills_mobile",
-    "text": "My mobile development skills include Swift, SwiftUI, and UIKit. I have built and shipped iOS applications to the App Store, including modular SwiftUI component architectures and UIKit integrations.",
+    "text": "Patrick Tran's mobile development skills include Swift, SwiftUI, and UIKit. He has built and shipped iOS applications to the App Store, including modular SwiftUI component architectures and UIKit integrations.",
     "category": "profile",
     "metadata": {"type": "skills", "area": "mobile"}
   },
   {
     "id": "profile_skills_frontend",
-    "text": "My web and frontend skills include TypeScript, JavaScript, React, Next.js, and Tailwind CSS. I build responsive web interfaces and full-stack web applications.",
+    "text": "Patrick Tran's web and frontend skills include TypeScript, JavaScript, React, Next.js, and Tailwind CSS. He builds responsive web interfaces and full-stack web applications.",
     "category": "profile",
     "metadata": {"type": "skills", "area": "frontend"}
   },
   {
     "id": "profile_skills_backend",
-    "text": "My backend skills include Python, FastAPI, REST API design, SQL, Node.js, and Express. I am experienced with asynchronous programming and building scalable API systems.",
+    "text": "Patrick Tran's backend skills include Python, FastAPI, REST API design, SQL, Node.js, and Express. He is experienced with asynchronous programming and building scalable API systems.",
     "category": "profile",
     "metadata": {"type": "skills", "area": "backend"}
   },
   {
     "id": "profile_skills_db",
-    "text": "I have experience with databases including Supabase (PostgreSQL), Firebase (NoSQL), and vector databases for AI retrieval systems.",
+    "text": "Patrick Tran has database experience with Supabase (PostgreSQL), Firebase (NoSQL), and vector databases for AI retrieval systems.",
     "category": "profile",
     "metadata": {"type": "skills", "area": "database"}
   },
   {
     "id": "profile_skills_ai",
-    "text": "My AI and machine learning skills include OpenCV, MediaPipe, TensorFlow, PyTorch, sentence-transformers, HuggingFace Transformers, and working with large language models such as OpenAI GPT and Anthropic Claude.",
+    "text": "Patrick Tran's AI and machine learning skills include OpenCV, MediaPipe, TensorFlow, PyTorch, sentence-transformers, HuggingFace Transformers, and working with large language models such as OpenAI GPT and Anthropic Claude.",
     "category": "profile",
     "metadata": {"type": "skills", "area": "ai"}
   },
   {
     "id": "profile_skills_devops",
-    "text": "My tools and platforms include Git, Firebase Remote Config and Analytics, AWS Amplify, Docker, Raspberry Pi, GitHub Actions CI/CD, Conda environment management, and Linux server deployment.",
+    "text": "Patrick Tran's tools and platforms include Git, Firebase Remote Config and Analytics, AWS Amplify, Docker, Raspberry Pi, GitHub Actions CI/CD, Conda environment management, and Linux server deployment.",
     "category": "profile",
     "metadata": {"type": "skills", "area": "devops"}
+  },
+  {
+    "id": "profile_skills_summary",
+    "text": "Patrick Tran's technical skills span mobile (Swift, SwiftUI, UIKit), web (React, TypeScript, Next.js), backend (Python, FastAPI, Node.js), databases (PostgreSQL, Firebase), AI/ML (PyTorch, TensorFlow, MediaPipe, LLMs), and DevOps (Docker, GitHub Actions, Linux). He is a full-stack and iOS engineer with 4+ years of professional experience.",
+    "category": "profile",
+    "metadata": {"type": "skills", "area": "summary"}
   },
   {
     "id": "profile_work_neurospring",
@@ -79,13 +85,13 @@
   },
   {
     "id": "profile_style",
-    "text": "My development style is practical and product-focused. I prefer clean modular architecture, clear naming, and building systems that are easy to extend. I care about code quality and keeping things simple.",
+    "text": "Patrick Tran's development style is practical and product-focused. He prefers clean modular architecture, clear naming, and building systems that are easy to extend. He cares about code quality and keeping things simple.",
     "category": "profile",
     "metadata": {"type": "style"}
   },
   {
     "id": "profile_interests",
-    "text": "I am interested in AI systems, retrieval-augmented generation (RAG), real-time detection systems, scalable API design, iOS development, and building tools that solve real problems.",
+    "text": "Patrick Tran is interested in AI systems, retrieval-augmented generation (RAG), real-time detection systems, scalable API design, iOS development, and building tools that solve real problems.",
     "category": "profile",
     "metadata": {"type": "interests"}
   },
