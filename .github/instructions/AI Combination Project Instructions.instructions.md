@@ -327,3 +327,157 @@ Example:
     "context": "profile"
   }
 }
+```
+
+---
+
+## Cloud Server & Deployment
+
+### Server Info
+
+| Field | Value |
+|---|---|
+| Provider | Hetzner |
+| Hostname | `ubuntu-2gb-hil-1` |
+| IP | `5.78.76.197` |
+| OS | Ubuntu 24.04 LTS |
+| Domain | `ai-dev.patrickcs-web.com` |
+| DNS | AWS Route 53 — Hosted Zone `Z09273321V4JZMOL08GT3` |
+| HTTPS | Let's Encrypt via Certbot (auto-renews, expires 2026-06-24) |
+
+### SSH Access
+
+- **SSH key file:** `C:\Users\nguyenphuctran\.ssh\cloudssh`
+- **Key passphrase / root password:** `971129`
+- **SSH user:** `root`
+
+**Connect from PowerShell using Posh-SSH:**
+
+```powershell
+Import-Module Posh-SSH -Force
+$keyFile = "C:\Users\nguyenphuctran\.ssh\cloudssh"
+$pass = ConvertTo-SecureString "971129" -AsPlainText -Force
+$cred = New-Object PSCredential("root", $pass)
+$s = New-SSHSession -ComputerName "5.78.76.197" -Credential $cred -KeyFile $keyFile -AcceptKey -Force
+$sid = $s.SessionId
+```
+
+**Run a command:**
+```powershell
+$r = Invoke-SSHCommand -SessionId $sid -Command "your command here" -TimeOut 60
+$r.Output
+```
+
+**Close session when done:**
+```powershell
+Remove-SSHSession -SessionId $sid | Out-Null
+```
+
+### Server Directory Layout
+
+```
+/root/AI-Sources-Project/     ← project root (cloned from GitHub)
+  .env                        ← live config (NOT in git)
+  .venv/                      ← Python virtualenv
+  data/                       ← knowledge JSON files
+  app/                        ← application code
+  main.py
+```
+
+### Environment File on Server
+
+Location: `/root/AI-Sources-Project/.env`
+
+Key values already configured:
+- `OPENAI_API_KEY` — live OpenAI key
+- `LLM_PROVIDER=openai`
+- `OPENAI_MODEL=gpt-4o-mini`
+- `DEBUG=false`
+- `HOST=0.0.0.0`
+- `PORT=8000`
+- `RELEVANCE_THRESHOLD=-10.0`
+
+### Systemd Service
+
+- **Service name:** `ai-combination`
+- **Unit file:** `/etc/systemd/system/ai-combination.service`
+- **Runs:** `/root/AI-Sources-Project/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000`
+- **Auto-restarts:** yes (on failure, RestartSec=5)
+- **Enabled at boot:** yes
+
+```bash
+# Check status
+systemctl status ai-combination --no-pager
+
+# Restart
+systemctl restart ai-combination
+
+# View logs
+journalctl -u ai-combination -n 50 --no-pager
+```
+
+### Nginx
+
+- **Site config:** `/etc/nginx/sites-available/ai-dev.patrickcs-web.com`
+- **Reverse proxy:** `localhost:80` → `127.0.0.1:8000`
+- **SSL:** managed by Certbot, terminates at Nginx
+
+### Standard Deployment Workflow
+
+Every time code changes are made locally, run this to deploy:
+
+```powershell
+# 1. Commit and push locally
+git add <changed files>
+git commit -m "your message"
+git push origin main
+
+# 2. SSH to server, pull, and restart (single PowerShell command)
+Import-Module Posh-SSH -Force
+$keyFile = "C:\Users\nguyenphuctran\.ssh\cloudssh"
+$pass = ConvertTo-SecureString "971129" -AsPlainText -Force
+$cred = New-Object PSCredential("root", $pass)
+$s = New-SSHSession -ComputerName "5.78.76.197" -Credential $cred -KeyFile $keyFile -AcceptKey -Force
+$r = Invoke-SSHCommand -SessionId $s.SessionId -Command "cd /root/AI-Sources-Project && git pull origin main 2>&1 && systemctl restart ai-combination && sleep 8 && systemctl is-active ai-combination && curl -s https://ai-dev.patrickcs-web.com/api/v1/health" -TimeOut 90
+$r.Output
+Remove-SSHSession -SessionId $s.SessionId | Out-Null
+```
+
+Expected successful output:
+```
+From https://github.com/patricktran2911/AI-Sources-Project
+   abc123..def456  main -> origin/main
+...
+active
+{"status":"ok"}
+```
+
+### GitHub Repository
+
+- **URL:** `https://github.com/patricktran2911/AI-Sources-Project.git`
+- **Default branch:** `main`
+- **Remote name:** `origin`
+
+### Production URLs
+
+| Endpoint | URL |
+|---|---|
+| Chat UI | `https://ai-dev.patrickcs-web.com/` |
+| Health check | `https://ai-dev.patrickcs-web.com/api/v1/health` |
+| Chat API | `https://ai-dev.patrickcs-web.com/api/v1/ai/chat` |
+| Streaming chat | `https://ai-dev.patrickcs-web.com/api/v1/ai/chat/stream` |
+| API docs | `https://ai-dev.patrickcs-web.com/docs` |
+
+### Local Development
+
+```powershell
+# Run locally (uses conda base env)
+conda run -n base python main.py
+
+# Run tests
+conda run -n base python -m pytest tests/ -v
+```
+
+Local server runs at: `http://127.0.0.1:8000`
+
+> **Note:** `test_chat.html` `BASE_URL` is currently set to `https://ai-dev.patrickcs-web.com` (production). Change it to `http://127.0.0.1:8000` for local testing, but revert before committing.
