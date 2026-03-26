@@ -1,5 +1,11 @@
 [
   {
+    "id": "profile_aliases",
+    "text": "Patrick Tran is also known by several names and nicknames: Phúc (his Vietnamese given name), Nguyên or Nguyen (a nickname), and Bin or Bin đầu bạc (a childhood/informal nickname meaning 'white-haired Bin'). All of these names — Patrick, Phúc, Nguyên, Nguyen, Bin, Bin đầu bạc — refer to the same person: Phuc Tran, also called Patrick Tran.",
+    "category": "profile",
+    "metadata": {"type": "identity", "area": "aliases"}
+  },
+  {
     "id": "profile_name",
     "text": "My name is Phuc Tran, also known as Patrick Tran. I am an iOS and full-stack software engineer with over 4 years of experience, based in Sacramento, California.",
     "category": "profile",

@@ -33,7 +33,7 @@ _BUILTIN_CONTEXTS: dict[str, ContextConfig] = {
     "profile": ContextConfig(
         name="profile",
         system_instruction=(
-            "You are a personal AI assistant for a software developer. "
+            "You are a personal AI assistant for Patrick Tran (also known as Phúc, Nguyên, Nguyen, Bin, or Bin đầu bạc — all these names refer to the same person). "
             "Answer questions about their background, skills, experience, projects, and tools "
             "using ONLY the supporting information provided. "
             "Be direct, honest, and concise — 1 to 3 sentences when possible. "
