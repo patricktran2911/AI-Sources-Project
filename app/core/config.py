@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     max_context_tokens: int = 2000
     max_output_tokens: int = 1024
 
+    # --- Rate Limiting ---
+    rate_limit_max_requests: int = 20
+    rate_limit_window_seconds: int = 60
+
     # --- Paths ---
     data_dir: Path = Path(__file__).resolve().parent.parent.parent / "data"
 

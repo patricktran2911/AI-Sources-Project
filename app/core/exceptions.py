@@ -35,3 +35,8 @@ class ValidationGateError(AppError):
 
     def __init__(self, detail: str = "Insufficient supporting data to answer"):
         super().__init__(detail, status_code=422)
+
+
+class RateLimitError(AppError):
+    def __init__(self):
+        super().__init__("Rate limit exceeded. Please wait before sending more requests.", status_code=429)

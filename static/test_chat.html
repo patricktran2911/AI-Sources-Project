@@ -437,6 +437,11 @@
       body: JSON.stringify(body),
     });
 
+    if (resp.status === 429) {
+      appendMsg('assistant', '⚠️ Rate limit reached — please wait a minute before sending more messages.');
+      setSending(false);
+      return;
+    }
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
       throw new Error(err.error || `HTTP ${resp.status}`);
@@ -514,6 +519,11 @@
       body: JSON.stringify(body),
     });
 
+    if (resp.status === 429) {
+      appendMsg('assistant', '⚠️ Rate limit reached — please wait a minute before sending more messages.');
+      setSending(false);
+      return;
+    }
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
 

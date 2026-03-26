@@ -24,6 +24,7 @@ from app.orchestration.orchestrator import Orchestrator
 from app.prompt.prompt_builder import PromptBuilder
 from app.providers.factory import get_provider
 from app.repository.knowledge_repo import KnowledgeRepository
+from app.core.rate_limiter import RateLimiter
 from app.retrieval.embedding_retriever import EmbeddingRetriever
 from app.validation.relevance_validator import RelevanceValidator
 
@@ -64,6 +65,10 @@ async def lifespan(app: FastAPI):
     app.state.context_registry = context_registry
     app.state.feature_registry = feature_registry
     app.state.session_store = SessionStore()
+    app.state.rate_limiter = RateLimiter(
+        max_requests=settings.rate_limit_max_requests,
+        window_seconds=settings.rate_limit_window_seconds,
+    )
 
     logger.info("All layers initialised — server ready")
     yield
@@ -94,6 +99,21 @@ def create_app() -> FastAPI:
             status_code=exc.status_code,
             content={"success": False, "error": exc.message},
         )
+
+    # Rate-limit middleware — only POST to AI endpoints costs money
+    @app.middleware("http")
+    async def rate_limit_middleware(request: Request, call_next):
+        if request.url.path.startswith("/api/v1/ai/") and request.method == "POST":
+            client_ip = request.client.host if request.client else "unknown"
+            if client_ip != "testclient":
+                limiter: RateLimiter = request.app.state.rate_limiter
+                if not limiter.is_allowed(client_ip):
+                    return JSONResponse(
+                        status_code=429,
+                        content={"success": False, "error": "Rate limit exceeded. Please wait before sending more requests."},
+                        headers={"Retry-After": "60"},
+                    )
+        return await call_next(request)
 
     # Routes
     app.include_router(health_router, prefix="/api/v1", tags=["system"])
