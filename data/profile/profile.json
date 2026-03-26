@@ -18,12 +18,6 @@
     "metadata": {"type": "summary"}
   },
   {
-    "id": "profile_education",
-    "text": "I am pursuing a Bachelor of Science in Computer Science at California State University, Sacramento, with an expected graduation date of May 2026. I have one class remaining in the spring semester and hold a GPA of 3.2.",
-    "category": "profile",
-    "metadata": {"type": "education"}
-  },
-  {
     "id": "profile_coursework",
     "text": "My relevant coursework includes Data Structures and Algorithms, Object-Oriented Design, Database Management, Software Engineering, and Artificial Intelligence.",
     "category": "profile",
@@ -94,5 +88,59 @@
     "text": "I am interested in AI systems, retrieval-augmented generation (RAG), real-time detection systems, scalable API design, iOS development, and building tools that solve real problems.",
     "category": "profile",
     "metadata": {"type": "interests"}
+  },
+  {
+    "id": "profile_contact",
+    "text": "Patrick Tran's email is patricktran291197@gmail.com. His GitHub is https://github.com/patricktran2911 and his LinkedIn is https://www.linkedin.com/in/patrick-tran-99768828a/.",
+    "category": "profile",
+    "metadata": {"type": "contact"}
+  },
+  {
+    "id": "profile_location",
+    "text": "Patrick lives in Sacramento, California in the Pacific Standard Time (PST) timezone.",
+    "category": "profile",
+    "metadata": {"type": "location"}
+  },
+  {
+    "id": "profile_languages",
+    "text": "Patrick speaks Vietnamese as his native language and English fluently.",
+    "category": "profile",
+    "metadata": {"type": "languages"}
+  },
+  {
+    "id": "profile_goal",
+    "text": "Patrick's career goal is to become a high-value Computer Science professional. He is passionate about software development and open to working in any industry.",
+    "category": "profile",
+    "metadata": {"type": "goal"}
+  },
+  {
+    "id": "profile_story",
+    "text": "Patrick was born in Vietnam and moved to the United States at age 19. He is now 27 years old, with a birthday on November 29th. His interest in computers started at age 5, inspired by watching his uncle Tran — who was coding and translating the Windows operating system into Vietnamese. That early experience sparked his lifelong passion for technology.",
+    "category": "profile",
+    "metadata": {"type": "story"}
+  },
+  {
+    "id": "profile_hobbies",
+    "text": "Outside of work, Patrick enjoys gaming, music, researching new technologies, and cooking.",
+    "category": "profile",
+    "metadata": {"type": "personal", "area": "hobbies"}
+  },
+  {
+    "id": "profile_personal",
+    "text": "Patrick's girlfriend is Chloe Le (Dương Trúc Quỳnh Lê). His mother is Trammie (Thị Ngọc Trâm Trần), his father is Hung Tran (Trần Hưng), and his brother is Hoang Phuc Tran (Trần Hoàng Phúc).",
+    "category": "profile",
+    "metadata": {"type": "personal", "area": "family"}
+  },
+  {
+    "id": "profile_education_vietnam",
+    "text": "Patrick completed his early education in Vietnam. He attended Hoàng Văn Thụ Primary School, Huỳnh Thúc Kháng Middle School, and Hồng Hà High School. He then enrolled at Đại Học Bách Khoa (Ho Chi Minh City University of Technology) before moving to the United States.",
+    "category": "profile",
+    "metadata": {"type": "education", "area": "vietnam"}
+  },
+  {
+    "id": "profile_education_us",
+    "text": "In the United States, Patrick started at Cosumnes River College in 2020, then transferred to California State University, Sacramento (Sacramento State) in 2023. He will graduate with a Bachelor of Science in Computer Science on May 22nd, 2026. He has a GPA of 3.2.",
+    "category": "profile",
+    "metadata": {"type": "education", "area": "us"}
   }
 ]

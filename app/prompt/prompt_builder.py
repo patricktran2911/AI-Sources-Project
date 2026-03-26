@@ -9,6 +9,10 @@ from app.core.schemas import RerankResult
 
 logger = logging.getLogger(__name__)
 
+_LANGUAGE_RULE = (
+    "Always detect the language of the user's question and respond in that exact same language."
+)
+
 
 class PromptBuilder:
     """Build clean, context-aware prompts from validated data and context rules."""
@@ -33,6 +37,7 @@ class PromptBuilder:
         if extra_rules:
             system_parts.extend(extra_rules)
         system_parts.append(f"Response style: {output_style}.")
+        system_parts.append(_LANGUAGE_RULE)
         system_msg = "\n".join(system_parts)
 
         if evidence:

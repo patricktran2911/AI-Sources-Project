@@ -13,9 +13,10 @@ from app.providers.base import BaseLLMProvider
 
 logger = logging.getLogger(__name__)
 
-_UNSUPPORTED = (
-    "I don't have enough information to answer that. "
-    "Feel free to ask me about my background, skills, projects, or experience."
+_GENERAL_SYSTEM = (
+    "You are a helpful AI assistant. "
+    "Answer the user's question clearly and accurately. "
+    "If you don't know the answer, say so honestly."
 )
 
 
@@ -36,12 +37,19 @@ class ChatFeature(BaseFeature):
         extra_rules: list[str] | None = None,
         **kwargs,
     ) -> dict[str, Any]:
-        # Validation gate — skip LLM entirely if no relevant data found
-        if not context_data:
-            logger.info("Chat gate: no relevant chunks for query '%s'", request.query)
-            return {"answer": _UNSUPPORTED, "supported": False}
-
         history: list[dict[str, str]] = request.options.get("history", [])
+
+        # No relevant knowledge chunks — fall back to plain GPT as a general assistant
+        if not context_data:
+            logger.info("Chat gate: no relevant chunks, using general fallback for query '%s'", request.query)
+            messages = self._prompt_builder.build(
+                query=request.query,
+                validated_chunks=[],
+                system_instruction=_GENERAL_SYSTEM,
+                history=history,
+            )
+            answer = await self._provider.generate(messages)
+            return {"answer": answer, "supported": False}
 
         messages = self._prompt_builder.build(
             query=request.query,
@@ -66,12 +74,20 @@ class ChatFeature(BaseFeature):
         **kwargs,
     ) -> AsyncIterator[str]:
         """Yield answer tokens one chunk at a time for SSE streaming."""
-        if not context_data:
-            logger.info("Chat stream gate: no relevant chunks for query '%s'", request.query)
-            yield _UNSUPPORTED
-            return
-
         history: list[dict[str, str]] = request.options.get("history", [])
+
+        # No relevant knowledge chunks — fall back to plain GPT as a general assistant
+        if not context_data:
+            logger.info("Chat stream gate: no relevant chunks, using general fallback for query '%s'", request.query)
+            messages = self._prompt_builder.build(
+                query=request.query,
+                validated_chunks=[],
+                system_instruction=_GENERAL_SYSTEM,
+                history=history,
+            )
+            async for token in self._provider.stream_generate(messages):
+                yield token
+            return
 
         messages = self._prompt_builder.build(
             query=request.query,
