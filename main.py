@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from app.api.ai_routes import router as ai_router
 from app.api.health import router as health_router
@@ -97,6 +98,11 @@ def create_app() -> FastAPI:
     # Routes
     app.include_router(health_router, prefix="/api/v1", tags=["system"])
     app.include_router(ai_router, prefix="/api/v1/ai", tags=["ai"])
+
+    # Serve the chat UI at root
+    @app.get("/", include_in_schema=False)
+    async def serve_chat_ui():
+        return FileResponse(Path(__file__).parent / "test_chat.html")
 
     return app
 
