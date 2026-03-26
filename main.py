@@ -102,7 +102,7 @@ def create_app() -> FastAPI:
     # Serve the chat UI at root
     @app.get("/", include_in_schema=False)
     async def serve_chat_ui():
-        return FileResponse(Path(__file__).parent / "test_chat.html")
+        return FileResponse(Path(__file__).parent / "static" / "test_chat.html")
 
     return app
 

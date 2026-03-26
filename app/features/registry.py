@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from app.features.base import BaseFeature
-from app.features.chat import ChatFeature
-from app.features.summarize import SummarizeFeature
-from app.features.suggest import SuggestFeature
+from app.features.chatbot.feature import ChatFeature
+from app.features.summarizer.feature import SummarizeFeature
+from app.features.suggester.feature import SuggestFeature
 from app.prompt.prompt_builder import PromptBuilder
 from app.providers.base import BaseLLMProvider
 
