@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patrick AI — Chat Test</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e8e8e8;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+    }
+
+    /* ── Header ──────────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: #1a1d27;
+      border-bottom: 1px solid #2a2d3a;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700;
+    }
+    header h1 { font-size: 15px; font-weight: 600; }
+    header p  { font-size: 12px; color: #888; margin-top: 1px; }
+
+    /* ── Controls ────────────────────────────────────────────────────── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      background: #13151f;
+      border-bottom: 1px solid #1e2130;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    label { font-size: 12px; color: #888; }
+    select, input[type="text"] {
+      background: #1e2130;
+      border: 1px solid #2e3147;
+      color: #e8e8e8;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 13px;
+      outline: none;
+    }
+    select:focus, input[type="text"]:focus { border-color: #6366f1; }
+    .mode-toggle {
+      display: flex;
+      gap: 4px;
+      background: #1e2130;
+      border-radius: 8px;
+      padding: 3px;
+    }
+    .mode-toggle button {
+      background: none; border: none; color: #888;
+      font-size: 12px; padding: 4px 12px; border-radius: 6px;
+      cursor: pointer; transition: all .15s;
+    }
+    .mode-toggle button.active {
+      background: #6366f1; color: #fff;
+    }
+    .controls-right { margin-left: auto; display: flex; gap: 8px; }
+    .btn-clear {
+      background: none; border: 1px solid #2e3147;
+      color: #888; border-radius: 6px; padding: 5px 12px;
+      font-size: 12px; cursor: pointer;
+    }
+    .btn-clear:hover { border-color: #6366f1; color: #e8e8e8; }
+
+    /* ── Chat area ───────────────────────────────────────────────────── */
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      max-width: 720px;
+    }
+    .message.user  { align-self: flex-end; flex-direction: row-reverse; }
+    .message.assistant { align-self: flex-start; }
+
+    .msg-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+    }
+    .user .msg-avatar      { background: #374151; }
+    .assistant .msg-avatar { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+
+    .bubble {
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.55;
+      max-width: 560px;
+      word-break: break-word;
+    }
+    .user .bubble {
+      background: #6366f1;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .assistant .bubble {
+      background: #1e2130;
+      color: #e8e8e8;
+      border-bottom-left-radius: 4px;
+    }
+    .assistant.unsupported .bubble { color: #f87171; background: #2a1a1a; }
+
+    .cursor {
+      display: inline-block;
+      width: 2px; height: 1em;
+      background: #6366f1;
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink .6s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Meta badge ──────────────────────────────────────────────────── */
+    .meta {
+      font-size: 11px;
+      color: #555;
+      margin-top: 4px;
+      padding-left: 42px;
+    }
+
+    /* ── Status bar ──────────────────────────────────────────────────── */
+    #status {
+      padding: 4px 20px;
+      font-size: 11px;
+      color: #555;
+      background: #0f1117;
+      flex-shrink: 0;
+      min-height: 20px;
+    }
+    #status.error { color: #f87171; }
+    #status.loading { color: #6366f1; }
+
+    /* ── Input bar ───────────────────────────────────────────────────── */
+    .input-bar {
+      display: flex;
+      gap: 10px;
+      padding: 14px 20px;
+      background: #1a1d27;
+      border-top: 1px solid #2a2d3a;
+      flex-shrink: 0;
+    }
+    #msgInput {
+      flex: 1;
+      background: #0f1117;
+      border: 1px solid #2a2d3a;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #e8e8e8;
+      outline: none;
+      resize: none;
+      min-height: 44px;
+      max-height: 140px;
+    }
+    #msgInput:focus      { border-color: #6366f1; }
+    #msgInput::placeholder { color: #555; }
+
+    .btn-send {
+      background: #6366f1;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      padding: 0 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+      min-width: 72px;
+    }
+    .btn-send:disabled { background: #2e3147; color: #555; cursor: default; }
+    .btn-send:not(:disabled):hover { background: #4f52d9; }
+
+    /* ── API test panel ──────────────────────────────────────────────── */
+    #apiPanel {
+      padding: 16px 20px;
+      background: #13151f;
+      border-top: 1px solid #1e2130;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+    }
+    #apiPanel h2 { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: .05em; }
+    .api-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .api-btn {
+      background: #1e2130; border: 1px solid #2e3147;
+      color: #aaa; border-radius: 6px; padding: 5px 12px;
+      font-size: 12px; cursor: pointer; font-family: monospace;
+    }
+    .api-btn:hover { border-color: #6366f1; color: #e8e8e8; }
+    #apiResult {
+      background: #0a0b10;
+      border: 1px solid #1e2130;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 12px;
+      font-family: monospace;
+      color: #6ee7b7;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      max-height: 120px;
+    }
+    .context-badge {
+      display: inline-block;
+      background: #1e2130;
+      border: 1px solid #2e3147;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 10px;
+      color: #6366f1;
+      font-family: monospace;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="avatar">P</div>
+  <div>
+    <h1>Patrick AI</h1>
+    <p>Personal AI assistant — powered by RAG + LLM</p>
+  </div>
+</header>
+
+<div class="controls">
+  <label>Context</label>
+  <select id="contextSel">
+    <option value="auto" selected>✦ Auto-detect</option>
+    <option value="profile">profile</option>
+    <option value="projects">projects</option>
+    <option value="portfolio">portfolio</option>
+    <option value="general">general</option>
+  </select>
+
+  <label>Mode</label>
+  <div class="mode-toggle">
+    <button id="btnStream" class="active" onclick="setMode('stream')">Stream (SSE)</button>
+    <button id="btnSync"                 onclick="setMode('sync')">Sync</button>
+  </div>
+
+  <label>Session ID</label>
+  <input type="text" id="sessionInput" value="test-session-1" style="width:160px;" />
+
+  <div class="controls-right">
+    <button class="btn-clear" onclick="toggleApiPanel()">API Tests</button>
+    <button class="btn-clear" onclick="clearChat()">Clear</button>
+  </div>
+</div>
+
+<div id="chat">
+  <!-- Welcome bubble -->
+  <div class="message assistant">
+    <div class="msg-avatar">P</div>
+    <div>
+      <div class="bubble">
+        Hi! I'm Patrick's personal AI. Ask me anything about his background, skills, projects, or experience.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="status"></div>
+
+<div class="input-bar">
+  <textarea id="msgInput" placeholder="Ask about Patrick…" rows="1"
+    onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+  <button class="btn-send" id="sendBtn" onclick="sendMessage()">Send</button>
+</div>
+
+<!-- API test panel -->
+<div id="apiPanel">
+  <h2>Quick API Tests</h2>
+  <div class="api-buttons">
+    <button class="api-btn" onclick="apiTest('GET','/api/v1/health')">GET /health</button>
+    <button class="api-btn" onclick="apiTest('GET','/api/v1/info')">GET /info</button>
+    <button class="api-btn" onclick="apiTest('GET','/api/v1/ai/contexts')">GET /contexts</button>
+    <button class="api-btn" onclick="apiTest('GET','/api/v1/ai/features')">GET /features</button>
+    <button class="api-btn" onclick="apiTestPost('/api/v1/ai/summarize',{query:'Summarize Patrick\'s background.',context:'profile'})">POST /summarize</button>
+    <button class="api-btn" onclick="apiTestPost('/api/v1/ai/suggest',{query:'What role suits Patrick?',context:'profile'})">POST /suggest</button>
+  </div>
+  <pre id="apiResult">Click a button above to test an endpoint.</pre>
+</div>
+
+<script>
+  // ── Config ────────────────────────────────────────────────────────────
+  const BASE_URL = 'http://127.0.0.1:8000';
+  let mode = 'stream';
+
+  // ── Helpers ───────────────────────────────────────────────────────────
+  function setMode(m) {
+    mode = m;
+    document.getElementById('btnStream').classList.toggle('active', m === 'stream');
+    document.getElementById('btnSync').classList.toggle('active', m === 'sync');
+  }
+
+  function setStatus(msg, cls = '') {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = cls;
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+
+  function setSending(sending) {
+    document.getElementById('sendBtn').disabled = sending;
+    document.getElementById('msgInput').disabled = sending;
+  }
+
+  function scrollToBottom() {
+    const chat = document.getElementById('chat');
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function clearChat() {
+    const chat = document.getElementById('chat');
+    chat.innerHTML = '';
+    setStatus('');
+  }
+
+  function toggleApiPanel() {
+    const panel = document.getElementById('apiPanel');
+    panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  // ── Append messages ───────────────────────────────────────────────────
+  function appendUserMessage(text) {
+    const chat = document.getElementById('chat');
+    const div = document.createElement('div');
+    div.className = 'message user';
+    div.innerHTML = `
+      <div class="msg-avatar">U</div>
+      <div><div class="bubble">${escapeHtml(text)}</div></div>`;
+    chat.appendChild(div);
+    scrollToBottom();
+  }
+
+  function appendAssistantBubble() {
+    const chat = document.getElementById('chat');
+    const wrap = document.createElement('div');
+    wrap.className = 'message assistant';
+
+    const innerDiv = document.createElement('div');
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    bubble.appendChild(cursor);
+    innerDiv.appendChild(bubble);
+    wrap.appendChild(document.createElement('div')).className = 'msg-avatar';
+    wrap.children[0].textContent = 'P';
+    wrap.appendChild(innerDiv);
+    chat.appendChild(wrap);
+    scrollToBottom();
+    return { wrap, bubble, cursor };
+  }
+
+  function escapeHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  // ── Send message ──────────────────────────────────────────────────────
+  async function sendMessage() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+    setSending(true);
+    appendUserMessage(text);
+
+    const context   = document.getElementById('contextSel').value;
+    const sessionId = document.getElementById('sessionInput').value.trim() || undefined;
+    const body = { message: text, context };
+    if (sessionId) body.session_id = sessionId;
+
+    try {
+      if (mode === 'stream') {
+        await sendStream(body, context);
+      } else {
+        await sendSync(body, context);
+      }
+    } catch (err) {
+      setStatus('Error: ' + err.message, 'error');
+      console.error(err);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  // ── SSE streaming ─────────────────────────────────────────────────────
+  async function sendStream(body, requestedContext) {
+    setStatus(requestedContext === 'auto' ? 'Detecting context…' : 'Connecting…', 'loading');
+    const { wrap, bubble, cursor } = appendAssistantBubble();
+
+    const resp = await fetch(`${BASE_URL}/api/v1/ai/chat/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${resp.status}`);
+    }
+
+    setStatus('Streaming…', 'loading');
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let textContent = '';
+    let supported = true;
+    let resolvedContext = requestedContext;
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // Process complete SSE lines
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // keep incomplete line
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const payload = JSON.parse(line.slice(6));
+
+          if (payload.token !== undefined) {
+            textContent += payload.token;
+            cursor.remove();
+            bubble.innerHTML = escapeHtml(textContent);
+            bubble.appendChild(cursor);
+            scrollToBottom();
+          }
+
+          if (payload.done) {
+            supported = payload.supported !== false;
+            if (payload.context) resolvedContext = payload.context;
+          }
+
+          if (payload.error) {
+            textContent += `[Error: ${payload.error}]`;
+            bubble.innerHTML = escapeHtml(textContent);
+            supported = false;
+          }
+        }
+      }
+    } finally {
+      cursor.remove();
+      if (!supported) {
+        wrap.classList.add('unsupported');
+        bubble.innerHTML = escapeHtml(textContent || 'I don\'t have enough information to answer that.');
+      } else {
+        bubble.innerHTML = escapeHtml(textContent);
+      }
+      // Show detected context badge
+      const metaEl = document.createElement('div');
+      metaEl.className = 'meta';
+      const ctxLabel = requestedContext === 'auto'
+        ? `<span class="context-badge">✦ auto → ${resolvedContext}</span>`
+        : `<span class="context-badge">${resolvedContext}</span>`;
+      metaEl.innerHTML = ctxLabel;
+      wrap.children[1].appendChild(metaEl);
+      setStatus(`Done · context: ${resolvedContext}${requestedContext === 'auto' ? ' (auto-detected)' : ''} · SSE stream`);
+    }
+  }
+
+  // ── Sync request ──────────────────────────────────────────────────────
+  async function sendSync(body, requestedContext) {
+    setStatus(requestedContext === 'auto' ? 'Detecting context…' : 'Waiting for response…', 'loading');
+
+    const resp = await fetch(`${BASE_URL}/api/v1/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
+
+    const { wrap, bubble, cursor } = appendAssistantBubble();
+    cursor.remove();
+    const answer = data.data?.answer || '';
+    const isSupported = data.data?.supported !== false;
+
+    bubble.innerHTML = escapeHtml(answer);
+    if (!isSupported) wrap.classList.add('unsupported');
+
+    const meta = data.meta || {};
+    const resolvedContext = meta.context || requestedContext;
+    const metaEl = document.createElement('div');
+    metaEl.className = 'meta';
+    const ctxLabel = requestedContext === 'auto'
+      ? `<span class="context-badge">✦ auto → ${resolvedContext}</span>`
+      : `<span class="context-badge">${resolvedContext}</span>`;
+    metaEl.innerHTML = ctxLabel + ` &nbsp;chunks: ${meta.chunks_validated ?? '?'}/${meta.chunks_retrieved ?? '?'} validated`;
+    wrap.children[1].appendChild(metaEl);
+
+    setStatus(`Done · context: ${resolvedContext}${requestedContext === 'auto' ? ' (auto-detected)' : ''} · sync · ${meta.chunks_validated ?? '?'} chunks used`);
+    scrollToBottom();
+  }
+
+  // ── API test panel ───────────────────────────────────────────────────
+  async function apiTest(method, path) {
+    const el = document.getElementById('apiResult');
+    el.textContent = `${method} ${path} …`;
+    try {
+      const resp = await fetch(BASE_URL + path, { method });
+      const json = await resp.json();
+      el.textContent = JSON.stringify(json, null, 2);
+    } catch (e) {
+      el.textContent = 'Error: ' + e.message;
+    }
+  }
+
+  async function apiTestPost(path, body) {
+    const el = document.getElementById('apiResult');
+    el.textContent = `POST ${path} …`;
+    try {
+      const resp = await fetch(BASE_URL + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = await resp.json();
+      el.textContent = JSON.stringify(json, null, 2);
+    } catch (e) {
+      el.textContent = 'Error: ' + e.message;
+    }
+  }
+
+  // Focus input on load
+  document.getElementById('msgInput').focus();
+</script>
+</body>
+</html>

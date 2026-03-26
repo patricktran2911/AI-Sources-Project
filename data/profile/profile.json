@@ -1,0 +1,98 @@
+[
+  {
+    "id": "profile_name",
+    "text": "My name is Phuc Tran, also known as Patrick Tran. I am an iOS and full-stack software engineer with over 4 years of experience, based in Sacramento, California.",
+    "category": "profile",
+    "metadata": {"type": "identity"}
+  },
+  {
+    "id": "profile_role",
+    "text": "I work as an iOS and full-stack engineer. I build and ship mobile applications in Swift and SwiftUI, as well as production web and backend systems using React, TypeScript, and Python with FastAPI. I also integrate AI-driven features including computer vision and machine learning models.",
+    "category": "profile",
+    "metadata": {"type": "role"}
+  },
+  {
+    "id": "profile_summary",
+    "text": "Patrick Tran has delivered apps from concept to launch, including an independent app published on the App Store and AI-powered solutions for healthcare and consumer applications. He has 4+ years of professional experience across mobile, web, and backend development.",
+    "category": "profile",
+    "metadata": {"type": "summary"}
+  },
+  {
+    "id": "profile_education",
+    "text": "I am pursuing a Bachelor of Science in Computer Science at California State University, Sacramento, with an expected graduation date of May 2026. I have one class remaining in the spring semester and hold a GPA of 3.2.",
+    "category": "profile",
+    "metadata": {"type": "education"}
+  },
+  {
+    "id": "profile_coursework",
+    "text": "My relevant coursework includes Data Structures and Algorithms, Object-Oriented Design, Database Management, Software Engineering, and Artificial Intelligence.",
+    "category": "profile",
+    "metadata": {"type": "education", "area": "coursework"}
+  },
+  {
+    "id": "profile_skills_mobile",
+    "text": "My mobile development skills include Swift, SwiftUI, and UIKit. I have built and shipped iOS applications to the App Store, including modular SwiftUI component architectures and UIKit integrations.",
+    "category": "profile",
+    "metadata": {"type": "skills", "area": "mobile"}
+  },
+  {
+    "id": "profile_skills_frontend",
+    "text": "My web and frontend skills include TypeScript, JavaScript, React, Next.js, and Tailwind CSS. I build responsive web interfaces and full-stack web applications.",
+    "category": "profile",
+    "metadata": {"type": "skills", "area": "frontend"}
+  },
+  {
+    "id": "profile_skills_backend",
+    "text": "My backend skills include Python, FastAPI, REST API design, SQL, Node.js, and Express. I am experienced with asynchronous programming and building scalable API systems.",
+    "category": "profile",
+    "metadata": {"type": "skills", "area": "backend"}
+  },
+  {
+    "id": "profile_skills_db",
+    "text": "I have experience with databases including Supabase (PostgreSQL), Firebase (NoSQL), and vector databases for AI retrieval systems.",
+    "category": "profile",
+    "metadata": {"type": "skills", "area": "database"}
+  },
+  {
+    "id": "profile_skills_ai",
+    "text": "My AI and machine learning skills include OpenCV, MediaPipe, TensorFlow, PyTorch, sentence-transformers, HuggingFace Transformers, and working with large language models such as OpenAI GPT and Anthropic Claude.",
+    "category": "profile",
+    "metadata": {"type": "skills", "area": "ai"}
+  },
+  {
+    "id": "profile_skills_devops",
+    "text": "My tools and platforms include Git, Firebase Remote Config and Analytics, AWS Amplify, Docker, Raspberry Pi, GitHub Actions CI/CD, Conda environment management, and Linux server deployment.",
+    "category": "profile",
+    "metadata": {"type": "skills", "area": "devops"}
+  },
+  {
+    "id": "profile_work_neurospring",
+    "text": "At NeuroSpring from February 2025 to December 2025, I worked as a Full-Stack Engineer on a hospital camera detection project. I architected and developed a real-time patient-monitoring platform to detect involuntary movement patterns for rapid ambulance deployment. I built cross-platform UIs using React and TypeScript for web and Raspberry Pi devices, deployed backend APIs with FastAPI, managed data using Supabase for real-time processing, and integrated MediaPipe along with a custom AI model called UNIK for posture and movement analysis.",
+    "category": "profile",
+    "metadata": {"type": "experience", "company": "NeuroSpring", "period": "Feb 2025 – Dec 2025"}
+  },
+  {
+    "id": "profile_work_fanfly",
+    "text": "At FanFly from October 2023 to December 2024, I worked as an iOS Engineer on a show ticket selling application. I led development of the company's first iOS app that connected fans and artists using modular SwiftUI components. I created reusable UI templates that reduced feature development time by about 30 percent, authored onboarding documentation, and resolved memory issues that helped boost app usage by 40 percent.",
+    "category": "profile",
+    "metadata": {"type": "experience", "company": "FanFly", "period": "Oct 2023 – Dec 2024"}
+  },
+  {
+    "id": "profile_work_scoop",
+    "text": "At Scoop Inc. from May 2023 to September 2023, I worked as an iOS Intern on a carpooling and commuting application. I converted Figma designs into responsive SwiftUI and UIKit interfaces, and integrated REST APIs using PromiseKit and Alamofire to support smooth asynchronous interactions.",
+    "category": "profile",
+    "metadata": {"type": "experience", "company": "Scoop Inc.", "period": "May 2023 – Sep 2023"}
+  },
+  {
+    "id": "profile_style",
+    "text": "My development style is practical and product-focused. I prefer clean modular architecture, clear naming, and building systems that are easy to extend. I care about code quality and keeping things simple.",
+    "category": "profile",
+    "metadata": {"type": "style"}
+  },
+  {
+    "id": "profile_interests",
+    "text": "I am interested in AI systems, retrieval-augmented generation (RAG), real-time detection systems, scalable API design, iOS development, and building tools that solve real problems.",
+    "category": "profile",
+    "metadata": {"type": "interests"}
+  }
+]

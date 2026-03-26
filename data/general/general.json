@@ -1,0 +1,14 @@
+[
+  {
+    "id": "general_1",
+    "text": "This AI server supports multiple features: chat, summarize, and suggest. Each feature can operate across different contexts such as profile, projects, and portfolio.",
+    "category": "general",
+    "metadata": {}
+  },
+  {
+    "id": "general_2",
+    "text": "The system uses retrieval-augmented generation (RAG): it first retrieves relevant knowledge locally, validates relevance with a cross-encoder, then generates a final answer via an external LLM.",
+    "category": "general",
+    "metadata": {}
+  }
+]
