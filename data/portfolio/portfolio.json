@@ -1,9 +1,9 @@
 [
   {
     "id": "portfolio_naturalization_app",
-    "text": "Naturalization Study App — A published iOS app on the Apple App Store for the U.S. naturalization test. Features adaptive flashcards, quizzes, progress analytics, multi-language support, Firebase Remote Config for real-time updates, and offline study with sync. Built independently from concept to App Store launch.",
+    "text": "Naturalization Study App — An independently built iOS app for the U.S. naturalization test. Features adaptive flashcards, quizzes, progress analytics, multi-language support, Firebase Remote Config for real-time updates, and offline study with sync. Previously published on the Apple App Store; currently unlisted as the Apple Developer account was not renewed. GitHub: https://github.com/patricktran2911/iUSC.",
     "category": "portfolio",
-    "metadata": {"type": "mobile app", "platform": "iOS", "status": "published"}
+    "metadata": {"type": "mobile app", "platform": "iOS", "status": "unlisted"}
   },
   {
     "id": "portfolio_neurospring",
@@ -13,26 +13,32 @@
   },
   {
     "id": "portfolio_pim",
-    "text": "STEMSight PIM — A medical AI system for real-time detection of 10 classes of Parkinson's involuntary movements. Uses Graph Convolutional Networks (UNIK) trained on skeleton data from MediaPipe. Achieved 82.88% accuracy. Built the full pipeline: data extraction, model training, and FastAPI inference server.",
+    "text": "STEMSight PIM — A medical AI system for real-time detection of 10 classes of Parkinson's involuntary movements. Uses Graph Convolutional Networks (UNIK) trained on skeleton data from MediaPipe. Achieved 82.88% accuracy. Built the full pipeline: data extraction, model training, and FastAPI inference server. GitHub: https://github.com/STEMSight-Project/PIM.",
     "category": "portfolio",
     "metadata": {"type": "AI/ML system", "domain": "medical AI", "status": "production"}
   },
   {
     "id": "portfolio_ai_combo",
-    "text": "AI Combination Server — A scalable multi-feature AI backend platform with RAG (retrieval-augmented generation). Supports chat, summarization, and suggestion across multiple knowledge contexts. Uses sentence-transformers for semantic retrieval, cross-encoder for reranking, and pluggable LLM providers (OpenAI, Anthropic, Gemini). Features SSE streaming for real-time chat.",
+    "text": "AI Combination Server — A scalable multi-feature AI backend platform with RAG (retrieval-augmented generation). Supports chat, summarization, and suggestion across multiple knowledge contexts. Uses sentence-transformers for semantic retrieval, cross-encoder for reranking, and pluggable LLM providers (OpenAI, Anthropic, Gemini). Features SSE streaming for real-time chat. GitHub: https://github.com/patricktran2911/AI-Sources-Project.",
     "category": "portfolio",
     "metadata": {"type": "AI platform", "domain": "AI backend", "status": "production"}
   },
   {
     "id": "portfolio_fanfly",
-    "text": "FanFly iOS App — Led development of a fan-artist connection platform for show ticket sales. Built the company's first iOS app using modular SwiftUI architecture. Created reusable UI templates that reduced development time by 30% and resolved performance issues that boosted app usage by 40%.",
+    "text": "FanFly iOS App — Led development of a fan-artist connection platform for show ticket sales. Built the company's first iOS app using modular SwiftUI architecture. Created reusable UI templates that reduced development time by 30% and resolved performance issues that boosted app usage by 40%. The app is still live on the App Store.",
     "category": "portfolio",
-    "metadata": {"type": "mobile app", "platform": "iOS", "status": "shipped"}
+    "metadata": {"type": "mobile app", "platform": "iOS", "status": "live"}
   },
   {
     "id": "portfolio_website",
-    "text": "Personal Portfolio Website — A responsive portfolio site showcasing projects, skills, and experience. Built with Next.js, React, TypeScript, and TailwindCSS. Hosted on AWS Amplify with automated CI/CD for continuous deployment.",
+    "text": "Personal Portfolio Website — A responsive portfolio site showcasing projects, skills, and experience. Built with Next.js, React, TypeScript, and TailwindCSS. Hosted on AWS Amplify with automated CI/CD for continuous deployment. Live at https://www.patrickcs-web.com/. GitHub: https://github.com/patricktran2911/patrick-website.",
     "category": "portfolio",
     "metadata": {"type": "web app", "domain": "personal", "status": "live"}
+  },
+  {
+    "id": "portfolio_medical_ocean",
+    "text": "Medical Ocean (Academic Project — Sacramento State): A hospital control and management system built as a team academic project, designed to streamline hospital operations and patient management.",
+    "category": "portfolio",
+    "metadata": {"type": "academic project", "domain": "healthcare"}
   }
 ]

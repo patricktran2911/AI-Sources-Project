@@ -1,7 +1,7 @@
 [
   {
     "id": "project_pim",
-    "text": "STEMSight PIM (Parkinson's Involuntary Movements Detection): A real-time medical AI system that detects 10 classes of Parkinson's involuntary movements using UNIK (Graph Convolutional Networks). Built with Python, PyTorch, FastAPI, and MediaPipe. Achieved 82.88% accuracy on 2600 samples. Uses a spatial-temporal GCN model trained on skeleton data extracted from video.",
+    "text": "STEMSight PIM (Parkinson's Involuntary Movements Detection): A real-time medical AI system that detects 10 classes of Parkinson's involuntary movements using UNIK (Graph Convolutional Networks). Built with Python, PyTorch, FastAPI, and MediaPipe. Achieved 82.88% accuracy on 2600 samples. Uses a spatial-temporal GCN model trained on skeleton data extracted from video. GitHub: https://github.com/STEMSight-Project/PIM.",
     "category": "projects",
     "metadata": {"tech": ["Python", "PyTorch", "FastAPI", "MediaPipe", "GCN"], "domain": "medical AI"}
   },
@@ -13,7 +13,7 @@
   },
   {
     "id": "project_ai_combo",
-    "text": "AI Combination Server: A scalable multi-feature AI backend platform built with FastAPI. Supports chat, summarization, and suggestion features across multiple contexts. Uses retrieval-augmented generation (RAG) with sentence-transformers for semantic retrieval, a cross-encoder for reranking, and configurable external LLM providers (OpenAI, Anthropic, Gemini). Includes SSE streaming for real-time chat responses.",
+    "text": "AI Combination Server: A scalable multi-feature AI backend platform built with FastAPI. Supports chat, summarization, and suggestion features across multiple contexts. Uses retrieval-augmented generation (RAG) with sentence-transformers for semantic retrieval, a cross-encoder for reranking, and configurable external LLM providers (OpenAI, Anthropic, Gemini). Includes SSE streaming for real-time chat responses. GitHub: https://github.com/patricktran2911/AI-Sources-Project.",
     "category": "projects",
     "metadata": {"tech": ["Python", "FastAPI", "sentence-transformers", "RAG", "OpenAI"], "domain": "AI platform"}
   },
@@ -31,13 +31,13 @@
   },
   {
     "id": "project_naturalization",
-    "text": "Naturalization Study App: Developed and launched an iOS app for the U.S. naturalization test featuring adaptive flashcards, quizzes, and analytics. Added multi-language support, used Firebase Remote Config for real-time content updates, and implemented offline study with sync capabilities. Published on the Apple App Store.",
+    "text": "Naturalization Study App: Developed and launched an iOS app for the U.S. naturalization test featuring adaptive flashcards, quizzes, and analytics. Added multi-language support, used Firebase Remote Config for real-time content updates, and implemented offline study with sync capabilities. Previously published on the Apple App Store (currently unlisted as Apple Developer account was not renewed). GitHub: https://github.com/patricktran2911/iUSC.",
     "category": "projects",
     "metadata": {"tech": ["Swift", "SwiftUI", "Firebase", "iOS"], "domain": "education"}
   },
   {
     "id": "project_portfolio_website",
-    "text": "Portfolio Website: A responsive personal portfolio website built with Next.js, React, TypeScript, and TailwindCSS. Hosted on AWS Amplify with automated CI/CD pipeline for continuous deployment.",
+    "text": "Portfolio Website: A responsive personal portfolio website built with Next.js, React, TypeScript, and TailwindCSS. Hosted on AWS Amplify with automated CI/CD pipeline for continuous deployment. GitHub: https://github.com/patricktran2911/patrick-website.",
     "category": "projects",
     "metadata": {"tech": ["Next.js", "React", "TypeScript", "TailwindCSS", "AWS Amplify"], "domain": "web"}
   },
@@ -46,5 +46,23 @@
     "text": "Scoop Carpooling App: Contributed to the iOS app for a carpooling and commuting platform. Converted Figma designs into responsive SwiftUI and UIKit interfaces, and integrated REST APIs using PromiseKit and Alamofire for smooth asynchronous data interactions.",
     "category": "projects",
     "metadata": {"tech": ["Swift", "SwiftUI", "UIKit", "PromiseKit", "Alamofire"], "domain": "transportation"}
+  },
+  {
+    "id": "project_mocanik",
+    "text": "Mocanik LLC Full-Stack Development: Currently working as a Full-Stack Developer at Mocanik LLC (January 2026 – present), building web applications using JavaScript and PHP.",
+    "category": "projects",
+    "metadata": {"tech": ["JavaScript", "PHP"], "domain": "web", "status": "active"}
+  },
+  {
+    "id": "project_ai_posture",
+    "text": "AI Posture and Symptom Detection (In Progress): Training AI models to detect patient postures and body landmarks from video, then predict patient symptoms based on detected movement patterns. This continues the medical AI work from STEMSight PIM.",
+    "category": "projects",
+    "metadata": {"tech": ["Python", "PyTorch", "MediaPipe"], "domain": "medical AI", "status": "in progress"}
+  },
+  {
+    "id": "project_medical_ocean",
+    "text": "Medical Ocean (Academic Project at Sacramento State): A hospital control and management system developed as an academic team project at California State University, Sacramento.",
+    "category": "projects",
+    "metadata": {"domain": "healthcare", "type": "academic"}
   }
 ]

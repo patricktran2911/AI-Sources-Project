@@ -154,5 +154,65 @@
     "text": "In the United States, Patrick started at Cosumnes River College in 2020, then transferred to California State University, Sacramento (Sacramento State) in 2023. He will graduate with a Bachelor of Science in Computer Science on May 22nd, 2026. He has a GPA of 3.2.",
     "category": "profile",
     "metadata": {"type": "education", "area": "us"}
+  },
+  {
+    "id": "profile_availability",
+    "text": "Patrick Tran is actively looking for job opportunities right now, even while finishing his degree. He is not waiting to graduate — he is available and open to roles immediately.",
+    "category": "profile",
+    "metadata": {"type": "availability"}
+  },
+  {
+    "id": "profile_job_preferences",
+    "text": "Patrick is open to iOS engineer, full-stack, back-end, AI/ML engineering, game development, and any other software engineering roles. He is comfortable with remote, hybrid, or on-site work. His career path preference is startup first, then mid-size company, then big tech. He is open to all industries except chemical industries.",
+    "category": "profile",
+    "metadata": {"type": "job preferences"}
+  },
+  {
+    "id": "profile_standout",
+    "text": "What makes Patrick stand out is his broad technical skillset, fast ability to learn new technologies, strong debugging and optimization skills, effective use of AI tools, and solid understanding of coding architecture and design patterns.",
+    "category": "profile",
+    "metadata": {"type": "strengths"}
+  },
+  {
+    "id": "profile_links",
+    "text": "Patrick Tran's portfolio website is https://www.patrickcs-web.com/. His public GitHub repositories include: STEMSight PIM at https://github.com/STEMSight-Project/PIM, AI Combination Server at https://github.com/patricktran2911/AI-Sources-Project, Portfolio Website at https://github.com/patricktran2911/patrick-website, and Naturalization App (iUSC) at https://github.com/patricktran2911/iUSC.",
+    "category": "profile",
+    "metadata": {"type": "links"}
+  },
+  {
+    "id": "profile_current_work",
+    "text": "As of early 2026, Patrick is working two roles: a Substitute Paraprofessor at a school, and a Full-Stack Developer at Mocanik LLC building web applications with JavaScript and PHP.",
+    "category": "profile",
+    "metadata": {"type": "experience", "company": "Mocanik LLC", "period": "Jan 2026 – present"}
+  },
+  {
+    "id": "profile_current_project",
+    "text": "Since NeuroSpring ended in December 2025, Patrick has been training AI models to detect patient postures and body landmarks from video, then predict patient symptoms from those detections.",
+    "category": "profile",
+    "metadata": {"type": "current focus"}
+  },
+  {
+    "id": "profile_team_style",
+    "text": "Patrick prefers a collaborative working style in a team. He is proud of his strong work ethic and consistent effort — qualities that define how he approaches every project.",
+    "category": "profile",
+    "metadata": {"type": "soft skills"}
+  },
+  {
+    "id": "profile_tools",
+    "text": "Patrick's daily development tools include Xcode for iOS development, Visual Studio Code for web and backend, IntelliJ IDEA for Java-based projects, GitHub for version control, and Terminal/Bash for command-line operations. He typically works from existing designs rather than creating UI/UX himself in Figma.",
+    "category": "profile",
+    "metadata": {"type": "tools"}
+  },
+  {
+    "id": "profile_academic_projects",
+    "text": "Patrick's notable academic projects at Sacramento State include Medical Ocean — a hospital control and management system — and STEMSight PIM — an ambulance camera detection system for identifying patient involuntary movements.",
+    "category": "profile",
+    "metadata": {"type": "education", "area": "academic projects"}
+  },
+  {
+    "id": "profile_contact_preference",
+    "text": "Patrick's preferred contact method for recruiters and collaborators is email at patricktran291197@gmail.com.",
+    "category": "profile",
+    "metadata": {"type": "contact", "area": "preference"}
   }
 ]
