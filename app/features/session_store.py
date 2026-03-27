@@ -9,7 +9,7 @@ from threading import Lock
 class SessionStore:
     """Stores the last N conversation turns per session ID (thread-safe, in-memory)."""
 
-    def __init__(self, max_turns: int = 3) -> None:
+    def __init__(self, max_turns: int = 2) -> None:
         # max_turns * 2 because each turn = 1 user msg + 1 assistant msg
         self._max_messages = max_turns * 2
         self._store: dict[str, deque[dict[str, str]]] = {}

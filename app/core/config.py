@@ -35,8 +35,8 @@ class Settings(BaseSettings):
     relevance_threshold: float = -10.0
 
     # --- Token / Cost ---
-    max_context_tokens: int = 2000
-    max_output_tokens: int = 1024
+    max_context_tokens: int = 1500
+    max_output_tokens: int = 512
 
     # --- Rate Limiting ---
     rate_limit_max_requests: int = 20
