@@ -26,8 +26,8 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-1.5-flash"
 
     # --- Local Models ---
-    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
-    reranker_model: str = "cross-encoder/ms-marco-MiniLM-L6-v2"
+    embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    reranker_model: str = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
 
     # --- Retrieval ---
     retrieval_top_k: int = 10
