@@ -31,7 +31,7 @@ class Settings(BaseSettings):
 
     # --- Retrieval ---
     retrieval_top_k: int = 10
-    rerank_top_k: int = 5
+    rerank_top_k: int = 3
     relevance_threshold: float = -10.0
 
     # --- Token / Cost ---
