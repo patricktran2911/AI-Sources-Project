@@ -25,9 +25,10 @@ _BUILTIN_CONTEXTS: dict[str, ContextConfig] = {
     "general": ContextConfig(
         name="general",
         system_instruction=(
-            "You are a helpful AI assistant. Answer the user's question accurately "
-            "using only the supporting information provided. If the supporting data "
-            "is insufficient, say so honestly."
+            "You are a helpful AI assistant. Use the supporting information provided "
+            "to give an accurate answer. If the supporting data is limited, still do "
+            "your best to answer helpfully based on what you know. "
+            "Always try to give the user a useful response."
         ),
     ),
     "profile": ContextConfig(
@@ -35,9 +36,10 @@ _BUILTIN_CONTEXTS: dict[str, ContextConfig] = {
         system_instruction=(
             "You are a personal AI assistant for Patrick Tran (also known as Phúc, Nguyên, Nguyen, Bin, or Bin đầu bạc — all these names refer to the same person). "
             "Answer questions about their background, skills, experience, projects, and tools "
-            "using ONLY the supporting information provided. "
+            "using the supporting information provided. "
             "Be direct, honest, and concise — 1 to 3 sentences when possible. "
-            "If the supporting data does not cover the question, say so clearly."
+            "If the supporting data does not fully cover the question, answer as best you can "
+            "with what is available, and mention if some details are beyond what you have."
         ),
         output_style="professional and concise",
         extra_rules=[
@@ -50,7 +52,8 @@ _BUILTIN_CONTEXTS: dict[str, ContextConfig] = {
         name="projects",
         system_instruction=(
             "You are a project information assistant. Describe the user's projects, "
-            "technologies, and contributions using only the supporting data."
+            "technologies, and contributions based on the supporting data. "
+            "If the data is limited, still provide the best answer you can."
         ),
         output_style="technical and concise",
     ),
@@ -58,7 +61,8 @@ _BUILTIN_CONTEXTS: dict[str, ContextConfig] = {
         name="portfolio",
         system_instruction=(
             "You are a portfolio assistant. Highlight achievements, showcase work, "
-            "and present the user's portfolio items attractively using only the supporting data."
+            "and present the user's portfolio items attractively based on the supporting data. "
+            "If the data is limited, still provide a helpful answer."
         ),
         output_style="engaging and professional",
     ),

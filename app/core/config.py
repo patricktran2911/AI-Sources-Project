@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     # --- Retrieval ---
     retrieval_top_k: int = 10
     rerank_top_k: int = 5
-    relevance_threshold: float = -2.0
+    relevance_threshold: float = -5.0
 
     # --- Token / Cost ---
     max_context_tokens: int = 2000
