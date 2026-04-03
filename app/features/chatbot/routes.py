@@ -5,9 +5,10 @@ from __future__ import annotations
 import json
 import logging
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
+from app.core.dependencies import OrchestratorDep, SessionStoreDep
 from app.core.schemas import AIRequest, ChatRequest, ChatResponse
 
 logger = logging.getLogger(__name__)
@@ -15,18 +16,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-def _get_orchestrator(request: Request):
-    return request.app.state.orchestrator
-
-
 @router.post("/chat", response_model=ChatResponse)
-async def chat(body: ChatRequest, request: Request):
-    session_store = request.app.state.session_store
-    orchestrator = _get_orchestrator(request)
+async def chat(body: ChatRequest, orchestrator: OrchestratorDep, session_store: SessionStoreDep):
 
     context = body.context
     if context == "auto":
-        context = orchestrator.detect_context(body.message)
+        context = await orchestrator.detect_context(body.message)
 
     history = session_store.get_history(body.session_id) if body.session_id else []
 
@@ -34,7 +29,7 @@ async def chat(body: ChatRequest, request: Request):
         query=body.message,
         context=context,
         feature="chat",
-        options={"history": history, "session_id": body.session_id},
+        options={"history": history, "session_id": body.session_id, "user_id": body.user_id},
     )
     response = await orchestrator.handle(ai_request)
 
@@ -49,14 +44,12 @@ async def chat(body: ChatRequest, request: Request):
 
 
 @router.post("/chat/stream")
-async def chat_stream(body: ChatRequest, request: Request):
+async def chat_stream(body: ChatRequest, orchestrator: OrchestratorDep, session_store: SessionStoreDep):
     """SSE endpoint — streams chat tokens as Server-Sent Events."""
-    session_store = request.app.state.session_store
-    orchestrator = _get_orchestrator(request)
 
     context = body.context
     if context == "auto":
-        context = orchestrator.detect_context(body.message)
+        context = await orchestrator.detect_context(body.message)
 
     history = session_store.get_history(body.session_id) if body.session_id else []
 
@@ -64,7 +57,7 @@ async def chat_stream(body: ChatRequest, request: Request):
         query=body.message,
         context=context,
         feature="chat",
-        options={"history": history, "session_id": body.session_id},
+        options={"history": history, "session_id": body.session_id, "user_id": body.user_id},
     )
 
     orchestrator.check_request(ai_request)

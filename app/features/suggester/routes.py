@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 
+from app.core.dependencies import OrchestratorDep
 from app.core.schemas import AIRequest, AIResponse
 
 router = APIRouter()
 
 
 @router.post("/suggest", response_model=AIResponse)
-async def suggest(body: AIRequest, request: Request):
+async def suggest(body: AIRequest, orchestrator: OrchestratorDep) -> AIResponse:
+    """Generate contextual suggestions using the configured LLM."""
     body.feature = "suggest"
-    return await request.app.state.orchestrator.handle(body)
+    return await orchestrator.handle(body)

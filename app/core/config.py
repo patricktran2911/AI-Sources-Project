@@ -42,6 +42,12 @@ class Settings(BaseSettings):
     rate_limit_max_requests: int = 20
     rate_limit_window_seconds: int = 60
 
+    # --- Database ---
+    database_url: str = "postgresql://user:password@localhost:5432/ai_sources"
+    rds_iam_auth: bool = False        # Set True to use AWS IAM token auth (RDS)
+    aws_region: str = "us-east-1"     # AWS region for IAM token / Secrets Manager
+    aws_secret_name: str = ""         # Secrets Manager secret name; if set, overrides DATABASE_URL + rds_iam_auth
+
     # --- Paths ---
     data_dir: Path = Path(__file__).resolve().parent.parent.parent / "data"
 

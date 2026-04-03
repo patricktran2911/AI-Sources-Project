@@ -48,7 +48,7 @@ class Orchestrator:
 
     # ── shared pipeline steps ─────────────────────────────────────────
 
-    def _resolve(self, request: AIRequest):
+    async def _resolve(self, request: AIRequest):
         """Run the common resolve → retrieve → validate pipeline.
 
         Returns (context_config, feature, validated_chunks, retrieval_count).
@@ -61,7 +61,8 @@ class Orchestrator:
         if feature is None:
             raise FeatureNotFoundError(request.feature)
 
-        chunks = self._repo.get_chunks(request.context)
+        user_id: str | None = request.options.get("user_id")
+        chunks = await self._repo.get_chunks(request.context, user_id=user_id)
         retrieved = self._retriever.retrieve(request.query, chunks)
         validated = self._validator.validate(request.query, retrieved)
 
@@ -73,7 +74,7 @@ class Orchestrator:
     # ── standard (non-streaming) ──────────────────────────────────────
 
     async def handle(self, request: AIRequest) -> AIResponse:
-        ctx, feature, validated, retrieved_count = self._resolve(request)
+        ctx, feature, validated, retrieved_count = await self._resolve(request)
 
         data = await feature.execute(
             request,
@@ -94,11 +95,11 @@ class Orchestrator:
             },
         )
 
-    def detect_context(self, query: str) -> str:
+    async def detect_context(self, query: str) -> str:
         """Return the best-matching context name for *query* (falls back to 'general')."""
         if self._context_router is None:
             return "general"
-        return self._context_router.route(query)
+        return await self._context_router.route(query)
 
     def check_request(self, request: AIRequest) -> None:
         """Eagerly validate context and feature; raises ContextNotFoundError / FeatureNotFoundError."""
@@ -112,7 +113,7 @@ class Orchestrator:
 
     async def handle_stream(self, request: AIRequest) -> AsyncIterator[str]:
         """Run the pipeline then yield text tokens from the feature's stream_execute."""
-        ctx, feature, validated, _ = self._resolve(request)
+        ctx, feature, validated, _ = await self._resolve(request)
 
         async for token in feature.stream_execute(
             request,

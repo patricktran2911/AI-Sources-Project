@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import pickle
 from pathlib import Path
@@ -145,44 +146,69 @@ class TestPromptBuilder:
 # ── KnowledgeRepository ───────────────────────────────────────────────────────
 
 class TestKnowledgeRepository:
-    def test_load_profile_chunks(self):
-        repo = KnowledgeRepository()
-        chunks = repo.get_chunks("profile")
-        assert len(chunks) > 0
+    """Tests for KnowledgeRepository using an asyncpg pool mock."""
+
+    def _make_pool(self, rows: list[dict]) -> MagicMock:
+        """Build a fake asyncpg pool that returns *rows* from fetch()."""
+        pool = MagicMock()
+        conn = MagicMock()
+
+        async def async_fetch(*args, **kwargs):
+            return rows
+
+        async def async_execute(*args, **kwargs):
+            pass
+
+        conn.fetch = async_fetch
+        conn.execute = async_execute
+
+        class _AcquireCtx:
+            async def __aenter__(self_):
+                return conn
+
+            async def __aexit__(self_, *a):
+                pass
+
+        pool.acquire = lambda: _AcquireCtx()
+        return pool
+
+    def _make_rows(self, context: str, n: int) -> list[dict]:
+        return [
+            {
+                "id": f"{context}_{i}",
+                "text": f"text {i}",
+                "category": context,
+                "metadata": "{}",
+            }
+            for i in range(n)
+        ]
+
+    @pytest.mark.asyncio
+    async def test_load_profile_chunks(self):
+        rows = self._make_rows("profile", 3)
+        repo = KnowledgeRepository(pool=self._make_pool(rows))
+        chunks = await repo.get_chunks("profile")
+        assert len(chunks) == 3
         for chunk in chunks:
             assert chunk.text
             assert chunk.category == "profile"
 
-    def test_load_projects_chunks(self):
-        repo = KnowledgeRepository()
-        chunks = repo.get_chunks("projects")
-        assert len(chunks) > 0
-
-    def test_load_portfolio_chunks(self):
-        repo = KnowledgeRepository()
-        chunks = repo.get_chunks("portfolio")
-        assert len(chunks) > 0
-
-    def test_unknown_context_returns_empty_list(self):
-        repo = KnowledgeRepository()
-        chunks = repo.get_chunks("does_not_exist")
+    @pytest.mark.asyncio
+    async def test_unknown_context_returns_empty_list(self):
+        repo = KnowledgeRepository(pool=self._make_pool([]))
+        chunks = await repo.get_chunks("does_not_exist")
         assert chunks == []
 
-    def test_chunks_are_cached(self):
-        repo = KnowledgeRepository()
-        first = repo.get_chunks("profile")
-        second = repo.get_chunks("profile")
-        assert first is second  # same object from cache
+    @pytest.mark.asyncio
+    async def test_get_chunks_with_user_id(self):
+        rows = self._make_rows("chatbot", 2)
+        repo = KnowledgeRepository(pool=self._make_pool(rows))
+        chunks = await repo.get_chunks("chatbot", user_id="alice")
+        assert len(chunks) == 2
 
-    def test_reload_clears_cache(self):
-        repo = KnowledgeRepository()
-        first = repo.get_chunks("profile")
-        repo.reload("profile")
-        second = repo.get_chunks("profile")
-        assert first is not second  # reloaded from disk
-
-    def test_list_contexts_includes_all_data_dirs(self):
-        repo = KnowledgeRepository()
-        contexts = repo.list_contexts()
-        for expected in ("general", "profile", "projects", "portfolio"):
-            assert expected in contexts, f"'{expected}' missing: {contexts}"
+    @pytest.mark.asyncio
+    async def test_reload_is_noop(self):
+        repo = KnowledgeRepository(pool=self._make_pool([]))
+        # Should not raise
+        await repo.reload()
+        await repo.reload("profile")

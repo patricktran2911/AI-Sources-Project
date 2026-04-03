@@ -1,7 +1,16 @@
-class AppError(Exception):
-    """Base application error."""
+"""Application-level exceptions.
 
-    def __init__(self, message: str = "An unexpected error occurred", status_code: int = 500):
+All custom exceptions extend ``AppError``.  The global exception handler in
+``main.py`` converts them to structured JSON responses automatically, so
+route handlers should raise these instead of ``HTTPException`` wherever
+possible.
+"""
+
+
+class AppError(Exception):
+    """Base application error — maps to a structured JSON HTTP response."""
+
+    def __init__(self, message: str = "An unexpected error occurred", status_code: int = 500) -> None:
         self.message = message
         self.status_code = status_code
         super().__init__(self.message)

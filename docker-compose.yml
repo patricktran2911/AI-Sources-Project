@@ -1,0 +1,36 @@
+# Local clone service for development / testing.
+# For production connect to AWS RDS (set DATABASE_URL in .env).
+#
+# Usage:
+#   docker compose up -d          # start local PostgreSQL on port 5433
+#   docker compose down -v        # stop and wipe data
+#
+# Then set in .env:
+#   DATABASE_URL=postgresql://aiuser:aipassword@localhost:5433/ai_sources
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ai_sources_db
+    restart: unless-stopped
+    command: ["postgres", "-c", "password_encryption=md5"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ai_sources}
+      POSTGRES_USER: ${POSTGRES_USER:-aiuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aipassword}
+      POSTGRES_HOST_AUTH_METHOD: md5
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aiuser} -d ${POSTGRES_DB:-ai_sources}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  pgdata:
+    driver: local

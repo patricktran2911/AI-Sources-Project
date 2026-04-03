@@ -18,6 +18,8 @@ from app.contexts.context_router import ContextRouter
 from app.core.config import get_settings
 from app.core.exceptions import AppError
 from app.core.logging import setup_logging
+from app.database.connection import create_pool
+from app.database.migrations import run_migrations, seed_from_json
 from app.features.registry import FeatureRegistry
 from app.features.session_store import SessionStore
 from app.orchestration.orchestrator import Orchestrator
@@ -38,8 +40,13 @@ async def lifespan(app: FastAPI):
     setup_logging(settings.debug)
     logger.info("Starting %s v%s", settings.app_name, settings.app_version)
 
+    # Database
+    pool = await create_pool(settings.database_url)
+    await run_migrations(pool)
+    await seed_from_json(pool, settings.data_dir)
+
     # Layers
-    knowledge_repo = KnowledgeRepository()
+    knowledge_repo = KnowledgeRepository(pool)
     retriever = EmbeddingRetriever()
     validator = RelevanceValidator()
     prompt_builder = PromptBuilder()
@@ -61,9 +68,12 @@ async def lifespan(app: FastAPI):
     )
 
     # Attach to app state so routes can access them
+    app.state.pool = pool
     app.state.orchestrator = orchestrator
     app.state.context_registry = context_registry
     app.state.feature_registry = feature_registry
+    app.state.knowledge_repo = knowledge_repo
+    app.state.provider = provider
     app.state.session_store = SessionStore()
     app.state.rate_limiter = RateLimiter(
         max_requests=settings.rate_limit_max_requests,
@@ -72,6 +82,7 @@ async def lifespan(app: FastAPI):
 
     logger.info("All layers initialised — server ready")
     yield
+    await pool.close()
     logger.info("Shutting down")
 
 
@@ -123,6 +134,11 @@ def create_app() -> FastAPI:
     @app.get("/", include_in_schema=False)
     async def serve_chat_ui():
         return FileResponse(Path(__file__).parent / "static" / "test_chat.html")
+
+    # Serve the full API test lab
+    @app.get("/test", include_in_schema=False)
+    async def serve_test_lab():
+        return FileResponse(Path(__file__).parent / "static" / "test_all.html")
 
     return app
 
