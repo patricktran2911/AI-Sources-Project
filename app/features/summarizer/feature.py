@@ -30,6 +30,9 @@ class SummarizeFeature(BaseFeature):
         extra_rules: list[str] | None = None,
         **kwargs,
     ) -> dict[str, Any]:
+        if not context_data:
+            return {"result": "No relevant knowledge found to summarise.", "supported": False}
+
         rules = list(extra_rules or [])
         rules.append("Produce a clear, structured summary of the supporting information.")
 

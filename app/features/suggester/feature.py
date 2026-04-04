@@ -30,6 +30,9 @@ class SuggestFeature(BaseFeature):
         extra_rules: list[str] | None = None,
         **kwargs,
     ) -> dict[str, Any]:
+        if not context_data:
+            return {"result": "No relevant knowledge found to generate suggestions.", "supported": False}
+
         rules = list(extra_rules or [])
         rules.append("Provide actionable, ranked suggestions based on the supporting information.")
 

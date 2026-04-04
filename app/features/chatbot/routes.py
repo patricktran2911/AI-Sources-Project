@@ -76,7 +76,7 @@ async def chat_stream(body: ChatRequest, orchestrator: OrchestratorDep, session_
 
         answer_text = "".join(full_answer)
 
-        if answer_text.startswith("I don't have enough information"):
+        if answer_text.startswith("I don't have"):
             supported = False
 
         if body.session_id and supported:

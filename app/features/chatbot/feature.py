@@ -13,15 +13,9 @@ from app.providers.base import BaseLLMProvider
 
 logger = logging.getLogger(__name__)
 
-_GENERAL_SYSTEM = (
-    "You are Patrick Tran's personal AI assistant. "
-    "Patrick Tran is also known as Phúc, Nguyên, Nguyen, Bin, or Bin đầu bạc — all these names refer to the same person. "
-    "You are friendly and helpful. "
-    "Your primary focus is answering questions about Patrick — his background, skills, projects, experience, and daily life. "
-    "You can also help with practical everyday questions such as weather, time zones, quick facts, or simple daily-life topics. "
-    "If a question is not directly about Patrick, still do your best to give a brief, helpful answer. "
-    "Keep answers short and helpful (1–4 sentences). "
-    "Only decline if the request is clearly inappropriate or harmful."
+_NO_DATA_ANSWER = (
+    "I don't have enough relevant information in my knowledge base to answer that question. "
+    "Please ask something related to the topics I know about."
 )
 
 
@@ -44,17 +38,10 @@ class ChatFeature(BaseFeature):
     ) -> dict[str, Any]:
         history: list[dict[str, str]] = request.options.get("history", [])
 
-        # No relevant knowledge chunks — fall back to plain GPT as a general assistant
+        # No relevant knowledge chunks — return canned refusal (no LLM call)
         if not context_data:
-            logger.info("Chat gate: no relevant chunks, using general fallback for query '%s'", request.query)
-            messages = self._prompt_builder.build(
-                query=request.query,
-                validated_chunks=[],
-                system_instruction=_GENERAL_SYSTEM,
-                history=history,
-            )
-            answer = await self._provider.generate(messages)
-            return {"answer": answer, "supported": False}
+            logger.info("Chat gate: no relevant chunks, refusing query '%s'", request.query)
+            return {"answer": _NO_DATA_ANSWER, "supported": False}
 
         messages = self._prompt_builder.build(
             query=request.query,
@@ -81,17 +68,10 @@ class ChatFeature(BaseFeature):
         """Yield answer tokens one chunk at a time for SSE streaming."""
         history: list[dict[str, str]] = request.options.get("history", [])
 
-        # No relevant knowledge chunks — fall back to plain GPT as a general assistant
+        # No relevant knowledge chunks — return canned refusal (no LLM call)
         if not context_data:
-            logger.info("Chat stream gate: no relevant chunks, using general fallback for query '%s'", request.query)
-            messages = self._prompt_builder.build(
-                query=request.query,
-                validated_chunks=[],
-                system_instruction=_GENERAL_SYSTEM,
-                history=history,
-            )
-            async for token in self._provider.stream_generate(messages):
-                yield token
+            logger.info("Chat stream gate: no relevant chunks, refusing query '%s'", request.query)
+            yield _NO_DATA_ANSWER
             return
 
         messages = self._prompt_builder.build(

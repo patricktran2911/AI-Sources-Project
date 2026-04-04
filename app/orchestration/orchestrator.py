@@ -17,6 +17,7 @@ from typing import Any
 
 from app.contexts.context_registry import ContextRegistry
 from app.contexts.context_router import ContextRouter
+from app.core.config import get_settings
 from app.core.exceptions import ContextNotFoundError, FeatureNotFoundError, ValidationGateError
 from app.core.schemas import AIRequest, AIResponse
 from app.features.registry import FeatureRegistry
@@ -25,6 +26,11 @@ from app.retrieval.embedding_retriever import EmbeddingRetriever
 from app.validation.relevance_validator import RelevanceValidator
 
 logger = logging.getLogger(__name__)
+
+_GATE_REFUSAL = (
+    "I don't have enough relevant information in my knowledge base to answer "
+    "that question. Please ask something related to the topics I know about."
+)
 
 
 class Orchestrator:
@@ -76,6 +82,22 @@ class Orchestrator:
     async def handle(self, request: AIRequest) -> AIResponse:
         ctx, feature, validated, retrieved_count = await self._resolve(request)
 
+        # ── relevance gate ────────────────────────────────────────────
+        if not validated and get_settings().relevance_gate_enabled:
+            logger.info("Relevance gate BLOCKED query (no supporting chunks): %s", request.query[:120])
+            key = "answer" if request.feature == "chat" else "result"
+            return AIResponse(
+                success=True,
+                data={key: _GATE_REFUSAL, "supported": False},
+                meta={
+                    "feature": request.feature,
+                    "context": request.context,
+                    "chunks_retrieved": retrieved_count,
+                    "chunks_validated": 0,
+                    "gated": True,
+                },
+            )
+
         data = await feature.execute(
             request,
             validated,
@@ -114,6 +136,12 @@ class Orchestrator:
     async def handle_stream(self, request: AIRequest) -> AsyncIterator[str]:
         """Run the pipeline then yield text tokens from the feature's stream_execute."""
         ctx, feature, validated, _ = await self._resolve(request)
+
+        # ── relevance gate ────────────────────────────────────────────
+        if not validated and get_settings().relevance_gate_enabled:
+            logger.info("Relevance gate BLOCKED stream query: %s", request.query[:120])
+            yield _GATE_REFUSAL
+            return
 
         async for token in feature.stream_execute(
             request,
