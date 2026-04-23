@@ -1,5 +1,5 @@
-from pathlib import Path
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings
 
@@ -8,13 +8,17 @@ class Settings(BaseSettings):
     """Central configuration loaded from environment / .env file."""
 
     # --- Application ---
-    app_name: str = "AI Combination Server"
-    app_version: str = "0.1.0"
+    app_name: str = "Personal AI Representative"
+    app_version: str = "0.2.0"
     debug: bool = False
 
     # --- Server ---
     host: str = "0.0.0.0"
     port: int = 8000
+
+    # --- Persona ---
+    persona_name: str = "Patrick Tran"
+    persona_aliases: str = "Phuc, Nguyen, Bin"
 
     # --- External LLM Provider ---
     llm_provider: str = "openai"  # openai | anthropic | gemini
@@ -30,18 +34,28 @@ class Settings(BaseSettings):
     reranker_model: str = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
 
     # --- Retrieval ---
-    retrieval_top_k: int = 10
-    rerank_top_k: int = 3
-    relevance_threshold: float = 0.0
+    retrieval_top_k: int = 20
+    rerank_top_k: int = 5
+    relevance_threshold: float = 0.35
     relevance_gate_enabled: bool = True
 
     # --- Token / Cost ---
-    max_context_tokens: int = 1500
-    max_output_tokens: int = 512
+    max_context_tokens: int = 1800
+    max_output_tokens: int = 450
+    max_user_query_chars: int = 1200
+    max_history_messages: int = 6
+    max_history_chars: int = 900
+    max_evidence_chunks: int = 4
+    max_evidence_chars: int = 1600
+    max_evidence_chunk_chars: int = 420
+    generation_temperature: float = 0.2
 
     # --- Rate Limiting ---
     rate_limit_max_requests: int = 20
     rate_limit_window_seconds: int = 60
+
+    # --- Chat sessions ---
+    session_max_turns: int = 4
 
     # --- Database ---
     database_url: str = "postgresql://user:password@localhost:5432/ai_sources"

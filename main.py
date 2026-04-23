@@ -28,6 +28,8 @@ from app.providers.factory import get_provider
 from app.repository.knowledge_repo import KnowledgeRepository
 from app.core.rate_limiter import RateLimiter
 from app.retrieval.embedding_retriever import EmbeddingRetriever
+from app.retrieval.hybrid_retriever import HybridRetriever
+from app.retrieval.bm25_retriever import BM25Retriever
 from app.validation.relevance_validator import RelevanceValidator
 
 logger = logging.getLogger(__name__)
@@ -48,6 +50,8 @@ async def lifespan(app: FastAPI):
     # Layers
     knowledge_repo = KnowledgeRepository(pool)
     retriever = EmbeddingRetriever()
+    bm25 = BM25Retriever()
+    hybrid = HybridRetriever(embedding_retriever=retriever, bm25_retriever=bm25)
     validator = RelevanceValidator()
     prompt_builder = PromptBuilder()
     provider = get_provider()
@@ -65,6 +69,7 @@ async def lifespan(app: FastAPI):
             knowledge_repo=knowledge_repo,
             retriever=retriever,
         ),
+        hybrid_retriever=hybrid,
     )
 
     # Attach to app state so routes can access them
@@ -74,7 +79,7 @@ async def lifespan(app: FastAPI):
     app.state.feature_registry = feature_registry
     app.state.knowledge_repo = knowledge_repo
     app.state.provider = provider
-    app.state.session_store = SessionStore()
+    app.state.session_store = SessionStore(max_turns=settings.session_max_turns, pool=pool)
     app.state.rate_limiter = RateLimiter(
         max_requests=settings.rate_limit_max_requests,
         window_seconds=settings.rate_limit_window_seconds,

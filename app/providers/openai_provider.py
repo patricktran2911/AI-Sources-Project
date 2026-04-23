@@ -29,7 +29,7 @@ class OpenAIProvider(BaseLLMProvider):
                 model=self._model,
                 messages=messages,
                 max_tokens=kwargs.get("max_tokens", settings.max_output_tokens),
-                temperature=kwargs.get("temperature", 0.7),
+                temperature=kwargs.get("temperature", settings.generation_temperature),
             )
             return response.choices[0].message.content or ""
         except Exception as exc:
@@ -43,7 +43,7 @@ class OpenAIProvider(BaseLLMProvider):
                 model=self._model,
                 messages=messages,
                 max_tokens=kwargs.get("max_tokens", settings.max_output_tokens),
-                temperature=kwargs.get("temperature", 0.7),
+                temperature=kwargs.get("temperature", settings.generation_temperature),
                 stream=True,
             )
             async for chunk in stream:

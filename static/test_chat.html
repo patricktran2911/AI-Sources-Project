@@ -1,585 +1,623 @@
 <!DOCTYPE html>
-<html lang="en,vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Patrick AI — Chat Test</title>
+  <title>Personal AI Representative</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f4efe6;
+      --panel: #fffaf1;
+      --panel-strong: #f0e6d6;
+      --ink: #1c251c;
+      --muted: #667064;
+      --accent: #22543d;
+      --accent-soft: #d8eadf;
+      --line: #d8cdbd;
+      --danger: #b0452d;
+      --shadow: 0 20px 40px rgba(35, 34, 28, 0.08);
+    }
+
+    * { box-sizing: border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117;
-      color: #e8e8e8;
+      margin: 0;
+      min-height: 100vh;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(34, 84, 61, 0.12), transparent 36%),
+        linear-gradient(180deg, #efe7d8 0%, var(--bg) 35%, #efe9df 100%);
+    }
+
+    .shell {
+      width: min(1120px, calc(100vw - 32px));
+      margin: 24px auto;
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .card {
+      background: rgba(255, 250, 241, 0.92);
+      border: 1px solid rgba(216, 205, 189, 0.92);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      padding: 28px;
       display: flex;
       flex-direction: column;
-      height: 100dvh;
+      gap: 18px;
     }
 
-    /* ── Header ──────────────────────────────────────────────────────── */
-    header {
-      display: flex;
+    .eyebrow {
+      display: inline-flex;
       align-items: center;
-      gap: 12px;
-      padding: 14px 20px;
-      background: #1a1d27;
-      border-bottom: 1px solid #2a2d3a;
-      flex-shrink: 0;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
     }
-    .avatar {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 700;
-    }
-    header h1 { font-size: 15px; font-weight: 600; }
-    header p  { font-size: 12px; color: #888; margin-top: 1px; }
 
-    /* ── Controls ────────────────────────────────────────────────────── */
-    .controls {
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(32px, 5vw, 52px);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p,
+    .helper,
+    .status {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .pill-grid {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 20px;
-      background: #13151f;
-      border-bottom: 1px solid #1e2130;
-      flex-shrink: 0;
       flex-wrap: wrap;
+      gap: 10px;
     }
-    label { font-size: 12px; color: #888; }
-    select, input[type="text"] {
-      background: #1e2130;
-      border: 1px solid #2e3147;
-      color: #e8e8e8;
-      border-radius: 6px;
-      padding: 5px 10px;
-      font-size: 13px;
-      outline: none;
-    }
-    select:focus, input[type="text"]:focus { border-color: #6366f1; }
-    .mode-toggle {
-      display: flex;
-      gap: 4px;
-      background: #1e2130;
-      border-radius: 8px;
-      padding: 3px;
-    }
-    .mode-toggle button {
-      background: none; border: none; color: #888;
-      font-size: 12px; padding: 4px 12px; border-radius: 6px;
-      cursor: pointer; transition: all .15s;
-    }
-    .mode-toggle button.active {
-      background: #6366f1; color: #fff;
-    }
-    .controls-right { margin-left: auto; display: flex; gap: 8px; }
-    .btn-clear {
-      background: none; border: 1px solid #2e3147;
-      color: #888; border-radius: 6px; padding: 5px 12px;
-      font-size: 12px; cursor: pointer;
-    }
-    .btn-clear:hover { border-color: #6366f1; color: #e8e8e8; }
 
-    /* ── Chat area ───────────────────────────────────────────────────── */
-    #chat {
+    .pill {
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: var(--panel-strong);
+      font-size: 12px;
+      color: var(--ink);
+    }
+
+    .chat {
+      display: flex;
+      flex-direction: column;
+      min-height: 80vh;
+      overflow: hidden;
+    }
+
+    .chat-top {
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 140px;
+      flex: 1 1 140px;
+    }
+
+    .field.compact {
+      flex: 0 0 150px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    select,
+    input,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    select,
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    select:focus,
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(34, 84, 61, 0.12);
+    }
+
+    .switch {
+      display: inline-flex;
+      gap: 6px;
+      padding: 5px;
+      border-radius: 999px;
+      background: var(--panel-strong);
+      align-self: end;
+    }
+
+    .switch button {
+      border: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .switch button.active {
+      background: var(--accent);
+      color: #f7f1e7;
+    }
+
+    .messages {
       flex: 1;
+      padding: 24px;
       overflow-y: auto;
-      padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      scroll-behavior: smooth;
+      background:
+        linear-gradient(180deg, rgba(255, 250, 241, 0.7), rgba(244, 239, 230, 0.3)),
+        radial-gradient(circle at bottom right, rgba(34, 84, 61, 0.08), transparent 22%);
     }
 
-    .message {
-      display: flex;
-      gap: 12px;
-      max-width: 720px;
+    .msg {
+      max-width: min(78%, 720px);
+      padding: 16px 18px;
+      border-radius: 22px;
+      line-height: 1.65;
+      box-shadow: 0 10px 24px rgba(36, 31, 18, 0.06);
+      border: 1px solid rgba(216, 205, 189, 0.9);
     }
-    .message.user  { align-self: flex-end; flex-direction: row-reverse; }
-    .message.assistant { align-self: flex-start; }
 
-    .msg-avatar {
-      width: 30px; height: 30px; border-radius: 50%;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700;
+    .msg.user {
+      align-self: flex-end;
+      background: var(--accent);
+      color: #f6f1e9;
+      border-bottom-right-radius: 6px;
     }
-    .user .msg-avatar      { background: #374151; }
-    .assistant .msg-avatar { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
 
-    .bubble {
-      padding: 10px 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      line-height: 1.55;
-      max-width: 560px;
-      word-break: break-word;
+    .msg.assistant {
+      align-self: flex-start;
+      background: #fffdf9;
+      border-bottom-left-radius: 6px;
     }
-    .user .bubble {
-      background: #6366f1;
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-    .assistant .bubble {
-      background: #1e2130;
-      color: #e8e8e8;
-      border-bottom-left-radius: 4px;
-    }
-    .assistant.unsupported .bubble { color: #f87171; background: #2a1a1a; }
 
-    .cursor {
-      display: inline-block;
-      width: 2px; height: 1em;
-      background: #6366f1;
-      margin-left: 2px;
-      vertical-align: text-bottom;
-      animation: blink .6s step-end infinite;
+    .msg.assistant.unsupported {
+      border-color: rgba(176, 69, 45, 0.25);
+      color: var(--danger);
+      background: #fff3ef;
     }
-    @keyframes blink { 50% { opacity: 0; } }
 
-    /* ── Meta badge ──────────────────────────────────────────────────── */
     .meta {
-      font-size: 11px;
-      color: #555;
-      margin-top: 4px;
-      padding-left: 42px;
-    }
-
-    /* ── Status bar ──────────────────────────────────────────────────── */
-    #status {
-      padding: 4px 20px;
-      font-size: 11px;
-      color: #555;
-      background: #0f1117;
-      flex-shrink: 0;
-      min-height: 20px;
-    }
-    #status.error { color: #f87171; }
-    #status.loading { color: #6366f1; }
-
-    /* ── Input bar ───────────────────────────────────────────────────── */
-    .input-bar {
+      margin-top: 10px;
       display: flex;
-      gap: 10px;
-      padding: 14px 20px;
-      background: #1a1d27;
-      border-top: 1px solid #2a2d3a;
-      flex-shrink: 0;
-    }
-    #msgInput {
-      flex: 1;
-      background: #0f1117;
-      border: 1px solid #2a2d3a;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 14px;
-      color: #e8e8e8;
-      outline: none;
-      resize: none;
-      min-height: 44px;
-      max-height: 140px;
-    }
-    #msgInput:focus      { border-color: #6366f1; }
-    #msgInput::placeholder { color: #555; }
-
-    .btn-send {
-      background: #6366f1;
-      border: none;
-      border-radius: 10px;
-      color: #fff;
-      padding: 0 18px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .15s;
-      min-width: 72px;
-    }
-    .btn-send:disabled { background: #2e3147; color: #555; cursor: default; }
-    .btn-send:not(:disabled):hover { background: #4f52d9; }
-
-    /* ── API test panel ──────────────────────────────────────────────── */
-    #apiPanel {
-      padding: 16px 20px;
-      background: #13151f;
-      border-top: 1px solid #1e2130;
-      display: none;
-      flex-direction: column;
+      flex-wrap: wrap;
       gap: 8px;
-      max-height: 220px;
-    }
-    #apiPanel h2 { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: .05em; }
-    .api-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
-    .api-btn {
-      background: #1e2130; border: 1px solid #2e3147;
-      color: #aaa; border-radius: 6px; padding: 5px 12px;
-      font-size: 12px; cursor: pointer; font-family: monospace;
-    }
-    .api-btn:hover { border-color: #6366f1; color: #e8e8e8; }
-    #apiResult {
-      background: #0a0b10;
-      border: 1px solid #1e2130;
-      border-radius: 6px;
-      padding: 10px;
       font-size: 12px;
-      font-family: monospace;
-      color: #6ee7b7;
-      white-space: pre-wrap;
-      overflow-y: auto;
-      max-height: 120px;
+      color: var(--muted);
     }
-    .context-badge {
-      display: inline-block;
-      background: #1e2130;
-      border: 1px solid #2e3147;
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-size: 10px;
-      color: #6366f1;
-      font-family: monospace;
-      margin-top: 4px;
+
+    .meta span {
+      background: var(--panel-strong);
+      padding: 6px 8px;
+      border-radius: 999px;
+    }
+
+    .composer {
+      padding: 18px 24px 24px;
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+    }
+
+    textarea {
+      min-height: 72px;
+      resize: vertical;
+    }
+
+    .primary,
+    .ghost {
+      border: none;
+      cursor: pointer;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-weight: 700;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #f6f1e9;
+      min-width: 120px;
+    }
+
+    .ghost {
+      background: var(--panel-strong);
+      color: var(--ink);
+    }
+
+    .primary:hover,
+    .ghost:hover {
+      transform: translateY(-1px);
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px 18px;
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .status.loading {
+      color: var(--accent);
+    }
+
+    @media (max-width: 920px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .chat {
+        min-height: 72vh;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        width: calc(100vw - 20px);
+        margin: 10px auto;
+      }
+
+      .hero,
+      .chat-top,
+      .messages,
+      .composer,
+      .status-row {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .composer {
+        grid-template-columns: 1fr;
+      }
+
+      .msg {
+        max-width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-
-<header>
-  <div class="avatar">P</div>
-  <div>
-    <h1>Patrick AI / Trợ Lý AI</h1>
-    <p>Personal AI assistant — powered by RAG + LLM · Hỗ trợ tiếng Việt</p>
-  </div>
-</header>
-
-<div class="controls">
-  <label>Context</label>
-  <select id="contextSel">
-    <option value="auto" selected>✦ Auto-detect</option>
-    <option value="profile">profile</option>
-    <option value="projects">projects</option>
-    <option value="portfolio">portfolio</option>
-    <option value="general">general</option>
-  </select>
-
-  <label>Mode</label>
-  <div class="mode-toggle">
-    <button id="btnStream" class="active" onclick="setMode('stream')">Stream (SSE)</button>
-    <button id="btnSync"                 onclick="setMode('sync')">Sync</button>
-  </div>
-
-  <label>Session ID</label>
-  <input type="text" id="sessionInput" value="test-session-1" style="width:160px;" />
-
-  <div class="controls-right">
-    <button class="btn-clear" onclick="toggleApiPanel()">API Tests</button>
-    <button class="btn-clear" onclick="clearChat()">Clear</button>
-  </div>
-</div>
-
-<div id="chat">
-  <!-- Welcome bubble -->
-  <div class="message assistant">
-    <div class="msg-avatar">P</div>
-    <div>
-      <div class="bubble">
-        Hi! I'm Patrick's personal AI. Ask me anything about his background, skills, projects, or experience.
+  <main class="shell">
+    <aside class="card hero">
+      <div class="eyebrow">Chat-Only Agent</div>
+      <div>
+        <h1 id="personaName">Personal AI Representative</h1>
       </div>
-    </div>
-  </div>
-</div>
+      <p id="personaSummary">
+        Ask grounded questions about the configured person. The assistant will stay inside approved profile, project, portfolio, and availability knowledge.
+      </p>
+      <div class="pill-grid">
+        <span class="pill">Prompt budgeted</span>
+        <span class="pill">RAG grounded</span>
+        <span class="pill">Chat only</span>
+        <span class="pill">Guarded against prompt injection</span>
+      </div>
+      <p class="helper">
+        Use the QA lab at <strong>/test</strong> for system, knowledge, and feedback checks.
+      </p>
+    </aside>
 
-<div id="status"></div>
+    <section class="card chat">
+      <div class="chat-top">
+        <div class="field compact">
+          <label for="contextSel">Context</label>
+          <select id="contextSel">
+            <option value="auto">auto</option>
+            <option value="general">general</option>
+            <option value="profile">profile</option>
+            <option value="projects">projects</option>
+            <option value="portfolio">portfolio</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sessionInput">Session ID</label>
+          <input id="sessionInput" type="text" />
+        </div>
+        <div class="field">
+          <label for="userInput">User ID</label>
+          <input id="userInput" type="text" placeholder="optional for custom knowledge" />
+        </div>
+        <div class="switch" aria-label="response mode">
+          <button id="modeStandard" class="active" type="button">Standard</button>
+          <button id="modeStream" type="button">Streaming</button>
+        </div>
+      </div>
 
-<div class="input-bar">
-  <textarea id="msgInput" placeholder="Ask about Patrick… / Hỏi về Patrick bằng tiếng Việt…" rows="1"
-    onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-  <button class="btn-send" id="sendBtn" onclick="sendMessage()">Send</button>
-</div>
+      <div id="messages" class="messages"></div>
 
-<!-- API test panel -->
-<div id="apiPanel">
-  <h2>Quick API Tests</h2>
-  <div class="api-buttons">
-    <button class="api-btn" onclick="apiTest('GET','/api/v1/health')">GET /health</button>
-    <button class="api-btn" onclick="apiTest('GET','/api/v1/info')">GET /info</button>
-    <button class="api-btn" onclick="apiTest('GET','/api/v1/ai/contexts')">GET /contexts</button>
-    <button class="api-btn" onclick="apiTest('GET','/api/v1/ai/features')">GET /features</button>
-    <button class="api-btn" onclick="apiTestPost('/api/v1/ai/summarize',{query:'Summarize Patrick\'s background.',context:'profile'})">POST /summarize</button>
-    <button class="api-btn" onclick="apiTestPost('/api/v1/ai/suggest',{query:'What role suits Patrick?',context:'profile'})">POST /suggest</button>
-  </div>
-  <pre id="apiResult">Click a button above to test an endpoint.</pre>
-</div>
+      <div class="composer">
+        <textarea id="messageInput" placeholder="Ask about the configured person..."></textarea>
+        <button id="sendBtn" class="primary" type="button">Send</button>
+      </div>
 
-<script>
-  // ── Config ────────────────────────────────────────────────────────────
-  const BASE_URL = 'https://ai-dev.patrickcs-web.com';
-  let mode = 'stream';
+      <div class="status-row">
+        <p id="status" class="status">Ready.</p>
+        <button id="clearBtn" class="ghost" type="button">Clear chat</button>
+      </div>
+    </section>
+  </main>
 
-  // ── Helpers ───────────────────────────────────────────────────────────
-  function setMode(m) {
-    mode = m;
-    document.getElementById('btnStream').classList.toggle('active', m === 'stream');
-    document.getElementById('btnSync').classList.toggle('active', m === 'sync');
-  }
+  <script>
+    const messagesEl = document.getElementById("messages");
+    const statusEl = document.getElementById("status");
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const contextSel = document.getElementById("contextSel");
+    const sessionInput = document.getElementById("sessionInput");
+    const userInput = document.getElementById("userInput");
+    const personaNameEl = document.getElementById("personaName");
+    const personaSummaryEl = document.getElementById("personaSummary");
+    const modeStandard = document.getElementById("modeStandard");
+    const modeStream = document.getElementById("modeStream");
 
-  function setStatus(msg, cls = '') {
-    const el = document.getElementById('status');
-    el.textContent = msg;
-    el.className = cls;
-  }
+    let streaming = false;
 
-  function autoResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
-  }
+    function setMode(useStream) {
+      streaming = useStream;
+      modeStandard.classList.toggle("active", !useStream);
+      modeStream.classList.toggle("active", useStream);
+    }
 
-  function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  }
+    function setStatus(text, kind = "") {
+      statusEl.textContent = text;
+      statusEl.className = "status";
+      if (kind) statusEl.classList.add(kind);
+    }
 
-  function setSending(sending) {
-    document.getElementById('sendBtn').disabled = sending;
-    document.getElementById('msgInput').disabled = sending;
-  }
-
-  function scrollToBottom() {
-    const chat = document.getElementById('chat');
-    chat.scrollTop = chat.scrollHeight;
-  }
-
-  function clearChat() {
-    const chat = document.getElementById('chat');
-    chat.innerHTML = '';
-    setStatus('');
-  }
-
-  function toggleApiPanel() {
-    const panel = document.getElementById('apiPanel');
-    panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
-  }
-
-  // ── Append messages ───────────────────────────────────────────────────
-  function appendUserMessage(text) {
-    const chat = document.getElementById('chat');
-    const div = document.createElement('div');
-    div.className = 'message user';
-    div.innerHTML = `
-      <div class="msg-avatar">U</div>
-      <div><div class="bubble">${escapeHtml(text)}</div></div>`;
-    chat.appendChild(div);
-    scrollToBottom();
-  }
-
-  function appendAssistantBubble() {
-    const chat = document.getElementById('chat');
-    const wrap = document.createElement('div');
-    wrap.className = 'message assistant';
-
-    const innerDiv = document.createElement('div');
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-
-    const cursor = document.createElement('span');
-    cursor.className = 'cursor';
-    bubble.appendChild(cursor);
-    innerDiv.appendChild(bubble);
-    wrap.appendChild(document.createElement('div')).className = 'msg-avatar';
-    wrap.children[0].textContent = 'P';
-    wrap.appendChild(innerDiv);
-    chat.appendChild(wrap);
-    scrollToBottom();
-    return { wrap, bubble, cursor };
-  }
-
-  function escapeHtml(t) {
-    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-  }
-
-  // ── Send message ──────────────────────────────────────────────────────
-  async function sendMessage() {
-    const input = document.getElementById('msgInput');
-    const text = input.value.trim();
-    if (!text) return;
-
-    input.value = '';
-    input.style.height = 'auto';
-    setSending(true);
-    appendUserMessage(text);
-
-    const context   = document.getElementById('contextSel').value;
-    const sessionId = document.getElementById('sessionInput').value.trim() || undefined;
-    const body = { message: text, context };
-    if (sessionId) body.session_id = sessionId;
-
-    try {
-      if (mode === 'stream') {
-        await sendStream(body, context);
-      } else {
-        await sendSync(body, context);
+    function ensureSessionId() {
+      if (!sessionInput.value.trim()) {
+        sessionInput.value = "session-" + Math.random().toString(36).slice(2, 10);
       }
-    } catch (err) {
-      setStatus('Error: ' + err.message, 'error');
-      console.error(err);
-    } finally {
-      setSending(false);
-    }
-  }
-
-  // ── SSE streaming ─────────────────────────────────────────────────────
-  async function sendStream(body, requestedContext) {
-    setStatus(requestedContext === 'auto' ? 'Detecting context…' : 'Connecting…', 'loading');
-    const { wrap, bubble, cursor } = appendAssistantBubble();
-
-    const resp = await fetch(`${BASE_URL}/api/v1/ai/chat/stream`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-
-    if (resp.status === 429) {
-      appendMsg('assistant', '⚠️ Rate limit reached — please wait a minute before sending more messages.');
-      setSending(false);
-      return;
-    }
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.error || `HTTP ${resp.status}`);
     }
 
-    setStatus('Streaming…', 'loading');
-    const reader = resp.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let textContent = '';
-    let supported = true;
-    let resolvedContext = requestedContext;
+    function appendMessage(role, text, meta = {}) {
+      const node = document.createElement("article");
+      node.className = "msg " + role + (meta.supported === false ? " unsupported" : "");
+      const textNode = document.createElement("div");
+      textNode.textContent = text;
+      node.appendChild(textNode);
 
-    try {
+      const metaEntries = [];
+      if (meta.context) metaEntries.push(["context", meta.context]);
+      if (meta.supported === false) metaEntries.push(["supported", "false"]);
+      if (meta.prompt_budget?.estimated_prompt_tokens) {
+        metaEntries.push(["prompt", meta.prompt_budget.estimated_prompt_tokens + " tokens"]);
+      }
+      if (meta.prompt_budget?.history_messages_used !== undefined) {
+        metaEntries.push(["history", String(meta.prompt_budget.history_messages_used)]);
+      }
+      if (meta.prompt_budget?.evidence_chunks_used !== undefined) {
+        metaEntries.push(["evidence", String(meta.prompt_budget.evidence_chunks_used)]);
+      }
+
+      if (metaEntries.length) {
+        const metaEl = document.createElement("div");
+        metaEl.className = "meta";
+        metaEntries.forEach(([label, value]) => {
+          const chip = document.createElement("span");
+          chip.textContent = label + ": " + value;
+          metaEl.appendChild(chip);
+        });
+        node.appendChild(metaEl);
+      }
+
+      messagesEl.appendChild(node);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return textNode;
+    }
+
+    async function loadInfo() {
+      try {
+        const response = await fetch("/api/v1/info");
+        const info = await response.json();
+        if (info.persona_name) {
+          personaNameEl.textContent = info.persona_name;
+          personaSummaryEl.textContent =
+            "Ask grounded questions about " +
+            info.persona_name +
+            ". The assistant only uses approved knowledge and refuses unsupported topics.";
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function sendStandard(payload) {
+      const response = await fetch("/api/v1/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.detail || body.error || "Chat request failed");
+      appendMessage("assistant", body.data.answer || "", {
+        context: body.meta.context,
+        supported: body.data.supported,
+        prompt_budget: body.meta.prompt_budget,
+      });
+    }
+
+    async function sendStream(payload) {
+      const response = await fetch("/api/v1/ai/chat/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok || !response.body) {
+        throw new Error("Streaming request failed");
+      }
+
+      const textNode = appendMessage("assistant", "");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let finalMeta = {};
+
       while (true) {
-        const { done, value } = await reader.read();
+        const { value, done } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
 
-        // Process complete SSE lines
-        const lines = buffer.split('\n');
-        buffer = lines.pop(); // keep incomplete line
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() || "";
 
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const payload = JSON.parse(line.slice(6));
-
-          if (payload.token !== undefined) {
-            textContent += payload.token;
-            cursor.remove();
-            bubble.innerHTML = escapeHtml(textContent);
-            bubble.appendChild(cursor);
-            scrollToBottom();
+        for (const part of parts) {
+          const line = part.trim();
+          if (!line.startsWith("data:")) continue;
+          const payload = JSON.parse(line.slice(5).trim());
+          if (payload.token) {
+            textNode.textContent += payload.token;
+            messagesEl.scrollTop = messagesEl.scrollHeight;
           }
-
           if (payload.done) {
-            supported = payload.supported !== false;
-            if (payload.context) resolvedContext = payload.context;
+            finalMeta = payload;
           }
-
           if (payload.error) {
-            textContent += `[Error: ${payload.error}]`;
-            bubble.innerHTML = escapeHtml(textContent);
-            supported = false;
+            throw new Error(payload.error);
           }
         }
       }
-    } finally {
-      cursor.remove();
-      if (!supported) {
-        wrap.classList.add('unsupported');
-        bubble.innerHTML = escapeHtml(textContent || 'I don\'t have enough information to answer that.');
-      } else {
-        bubble.innerHTML = escapeHtml(textContent);
+
+      const wrapper = textNode.parentElement;
+      if (finalMeta.supported === false) {
+        wrapper.classList.add("unsupported");
       }
-      // Show detected context badge
-      const metaEl = document.createElement('div');
-      metaEl.className = 'meta';
-      const ctxLabel = requestedContext === 'auto'
-        ? `<span class="context-badge">✦ auto → ${resolvedContext}</span>`
-        : `<span class="context-badge">${resolvedContext}</span>`;
-      metaEl.innerHTML = ctxLabel;
-      wrap.children[1].appendChild(metaEl);
-      setStatus(`Done · context: ${resolvedContext}${requestedContext === 'auto' ? ' (auto-detected)' : ''} · SSE stream`);
+      if (finalMeta.context || finalMeta.prompt_budget) {
+        const metaEl = document.createElement("div");
+        metaEl.className = "meta";
+        if (finalMeta.context) {
+          const chip = document.createElement("span");
+          chip.textContent = "context: " + finalMeta.context;
+          metaEl.appendChild(chip);
+        }
+        if (finalMeta.prompt_budget?.estimated_prompt_tokens) {
+          const chip = document.createElement("span");
+          chip.textContent = "prompt: " + finalMeta.prompt_budget.estimated_prompt_tokens + " tokens";
+          metaEl.appendChild(chip);
+        }
+        if (finalMeta.gated) {
+          const chip = document.createElement("span");
+          chip.textContent = "gated";
+          metaEl.appendChild(chip);
+        }
+        if (finalMeta.guarded) {
+          const chip = document.createElement("span");
+          chip.textContent = "guarded";
+          metaEl.appendChild(chip);
+        }
+        wrapper.appendChild(metaEl);
+      }
     }
-  }
 
-  // ── Sync request ──────────────────────────────────────────────────────
-  async function sendSync(body, requestedContext) {
-    setStatus(requestedContext === 'auto' ? 'Detecting context…' : 'Waiting for response…', 'loading');
+    async function handleSend() {
+      const message = messageInput.value.trim();
+      if (!message) return;
 
-    const resp = await fetch(`${BASE_URL}/api/v1/ai/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      ensureSessionId();
+      const payload = {
+        message,
+        context: contextSel.value,
+        session_id: sessionInput.value.trim() || null,
+        user_id: userInput.value.trim() || null,
+      };
+
+      appendMessage("user", message, { context: payload.context });
+      messageInput.value = "";
+      sendBtn.disabled = true;
+      setStatus(streaming ? "Streaming response..." : "Waiting for answer...", "loading");
+
+      try {
+        if (streaming) {
+          await sendStream(payload);
+        } else {
+          await sendStandard(payload);
+        }
+        setStatus("Ready.");
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || "Request failed.", "error");
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    function clearMessages() {
+      messagesEl.innerHTML = "";
+      setStatus("Ready.");
+    }
+
+    modeStandard.addEventListener("click", () => setMode(false));
+    modeStream.addEventListener("click", () => setMode(true));
+    sendBtn.addEventListener("click", handleSend);
+    clearBtn.addEventListener("click", clearMessages);
+    messageInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        handleSend();
+      }
     });
 
-    if (resp.status === 429) {
-      appendMsg('assistant', '⚠️ Rate limit reached — please wait a minute before sending more messages.');
-      setSending(false);
-      return;
-    }
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
-
-    const { wrap, bubble, cursor } = appendAssistantBubble();
-    cursor.remove();
-    const answer = data.data?.answer || '';
-    const isSupported = data.data?.supported !== false;
-
-    bubble.innerHTML = escapeHtml(answer);
-    if (!isSupported) wrap.classList.add('unsupported');
-
-    const meta = data.meta || {};
-    const resolvedContext = meta.context || requestedContext;
-    const metaEl = document.createElement('div');
-    metaEl.className = 'meta';
-    const ctxLabel = requestedContext === 'auto'
-      ? `<span class="context-badge">✦ auto → ${resolvedContext}</span>`
-      : `<span class="context-badge">${resolvedContext}</span>`;
-    metaEl.innerHTML = ctxLabel + ` &nbsp;chunks: ${meta.chunks_validated ?? '?'}/${meta.chunks_retrieved ?? '?'} validated`;
-    wrap.children[1].appendChild(metaEl);
-
-    setStatus(`Done · context: ${resolvedContext}${requestedContext === 'auto' ? ' (auto-detected)' : ''} · sync · ${meta.chunks_validated ?? '?'} chunks used`);
-    scrollToBottom();
-  }
-
-  // ── API test panel ───────────────────────────────────────────────────
-  async function apiTest(method, path) {
-    const el = document.getElementById('apiResult');
-    el.textContent = `${method} ${path} …`;
-    try {
-      const resp = await fetch(BASE_URL + path, { method });
-      const json = await resp.json();
-      el.textContent = JSON.stringify(json, null, 2);
-    } catch (e) {
-      el.textContent = 'Error: ' + e.message;
-    }
-  }
-
-  async function apiTestPost(path, body) {
-    const el = document.getElementById('apiResult');
-    el.textContent = `POST ${path} …`;
-    try {
-      const resp = await fetch(BASE_URL + path, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const json = await resp.json();
-      el.textContent = JSON.stringify(json, null, 2);
-    } catch (e) {
-      el.textContent = 'Error: ' + e.message;
-    }
-  }
-
-  // Focus input on load
-  document.getElementById('msgInput').focus();
-</script>
+    ensureSessionId();
+    loadInfo();
+    appendMessage(
+      "assistant",
+      "Ask a question about the configured persona. Unsupported topics will be refused before generation when possible."
+    );
+  </script>
 </body>
 </html>

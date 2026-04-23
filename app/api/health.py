@@ -41,4 +41,5 @@ async def info():
         "app": s.app_name,
         "version": s.app_version,
         "llm_provider": s.llm_provider,
+        "persona_name": s.persona_name,
     }

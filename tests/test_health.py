@@ -18,3 +18,4 @@ def test_info(client):
     assert "app" in data
     assert "version" in data
     assert "llm_provider" in data
+    assert "persona_name" in data

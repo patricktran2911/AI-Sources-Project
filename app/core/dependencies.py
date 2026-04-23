@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
+import asyncpg
 from fastapi import Depends, Request
 
 from app.core.config import Settings, get_settings
@@ -68,6 +69,11 @@ def _get_rate_limiter(request: Request) -> RateLimiter:
     return request.app.state.rate_limiter
 
 
+def _get_db_pool(request: Request):
+    """Return the asyncpg connection pool from app state."""
+    return request.app.state.pool
+
+
 # ── typed aliases — import these in route handlers ─────────────────────
 #
 #   Each alias combines the concrete type with the Depends() call so that:
@@ -82,4 +88,5 @@ ProviderDep       = Annotated[BaseLLMProvider,  Depends(_get_provider)]
 SessionStoreDep   = Annotated[SessionStore,     Depends(_get_session_store)]
 FeatureRegistryDep = Annotated[FeatureRegistry, Depends(_get_feature_registry)]
 ContextRegistryDep = Annotated[ContextRegistry, Depends(_get_context_registry)]
+DbPoolDep          = Annotated[asyncpg.Pool,    Depends(_get_db_pool)]
 

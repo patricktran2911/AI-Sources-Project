@@ -338,27 +338,27 @@ Example:
 | Field | Value |
 |---|---|
 | Provider | Hetzner |
-| Hostname | `ubuntu-2gb-hil-1` |
-| IP | `5.78.76.197` |
+| Hostname | `<<private>>` |
+| IP | `<<private>>` |
 | OS | Ubuntu 24.04 LTS |
-| Domain | `ai-dev.patrickcs-web.com` |
+| Domain | `<<private>>` |
 | DNS | AWS Route 53 — Hosted Zone `Z09273321V4JZMOL08GT3` |
 | HTTPS | Let's Encrypt via Certbot (auto-renews, expires 2026-06-24) |
 
 ### SSH Access
 
-- **SSH key file:** `C:\Users\nguyenphuctran\.ssh\cloudssh`
-- **Key passphrase / root password:** `971129`
-- **SSH user:** `root`
+- **SSH key file:** retrieve from secure secret storage
+- **Key passphrase / root password:** never store in git
+- **SSH user:** use the server's approved deployment user
 
 **Connect from PowerShell using Posh-SSH:**
 
 ```powershell
 Import-Module Posh-SSH -Force
-$keyFile = "C:\Users\nguyenphuctran\.ssh\cloudssh"
-$pass = ConvertTo-SecureString "971129" -AsPlainText -Force
-$cred = New-Object PSCredential("root", $pass)
-$s = New-SSHSession -ComputerName "5.78.76.197" -Credential $cred -KeyFile $keyFile -AcceptKey -Force
+$keyFile = "<path-from-secret-store>"
+$pass = ConvertTo-SecureString "<passphrase-from-secret-store>" -AsPlainText -Force
+$cred = New-Object PSCredential("<ssh-user>", $pass)
+$s = New-SSHSession -ComputerName "<server-ip>" -Credential $cred -KeyFile $keyFile -AcceptKey -Force
 $sid = $s.SessionId
 ```
 
@@ -386,7 +386,7 @@ Remove-SSHSession -SessionId $sid | Out-Null
 
 ### Environment File on Server
 
-Location: `/root/AI-Sources-Project/.env`
+Location: deployment-specific path outside git control
 
 Key values already configured:
 - `OPENAI_API_KEY` — live OpenAI key
@@ -418,9 +418,9 @@ journalctl -u ai-combination -n 50 --no-pager
 
 ### Nginx
 
-- **Site config:** `/etc/nginx/sites-available/ai-dev.patrickcs-web.com`
+- **Site config:** deployment-specific
 - **Reverse proxy:** `localhost:80` → `127.0.0.1:8000`
-- **SSL:** managed by Certbot, terminates at Nginx
+- **SSL:** managed outside the repo
 
 ### Standard Deployment Workflow
 
@@ -434,11 +434,11 @@ git push origin main
 
 # 2. SSH to server, pull, and restart (single PowerShell command)
 Import-Module Posh-SSH -Force
-$keyFile = "C:\Users\nguyenphuctran\.ssh\cloudssh"
-$pass = ConvertTo-SecureString "971129" -AsPlainText -Force
-$cred = New-Object PSCredential("root", $pass)
-$s = New-SSHSession -ComputerName "5.78.76.197" -Credential $cred -KeyFile $keyFile -AcceptKey -Force
-$r = Invoke-SSHCommand -SessionId $s.SessionId -Command "cd /root/AI-Sources-Project && git pull origin main 2>&1 && systemctl restart ai-combination && sleep 8 && systemctl is-active ai-combination && curl -s https://ai-dev.patrickcs-web.com/api/v1/health" -TimeOut 90
+$keyFile = "<path-from-secret-store>"
+$pass = ConvertTo-SecureString "<passphrase-from-secret-store>" -AsPlainText -Force
+$cred = New-Object PSCredential("<ssh-user>", $pass)
+$s = New-SSHSession -ComputerName "<server-ip>" -Credential $cred -KeyFile $keyFile -AcceptKey -Force
+$r = Invoke-SSHCommand -SessionId $s.SessionId -Command "cd /srv/personal-ai-representative && git pull origin main 2>&1 && systemctl restart ai-combination && sleep 8 && systemctl is-active ai-combination && curl -s https://<domain>/api/v1/health" -TimeOut 90
 $r.Output
 Remove-SSHSession -SessionId $s.SessionId | Out-Null
 ```
@@ -462,11 +462,11 @@ active
 
 | Endpoint | URL |
 |---|---|
-| Chat UI | `https://ai-dev.patrickcs-web.com/` |
-| Health check | `https://ai-dev.patrickcs-web.com/api/v1/health` |
-| Chat API | `https://ai-dev.patrickcs-web.com/api/v1/ai/chat` |
-| Streaming chat | `https://ai-dev.patrickcs-web.com/api/v1/ai/chat/stream` |
-| API docs | `https://ai-dev.patrickcs-web.com/docs` |
+| Chat UI | `https://<domain>/` |
+| Health check | `https://<domain>/api/v1/health` |
+| Chat API | `https://<domain>/api/v1/ai/chat` |
+| Streaming chat | `https://<domain>/api/v1/ai/chat/stream` |
+| API docs | `https://<domain>/docs` |
 
 ### Local Development
 

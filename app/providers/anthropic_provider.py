@@ -38,7 +38,7 @@ class AnthropicProvider(BaseLLMProvider):
                 system=system_msg,
                 messages=user_messages,
                 max_tokens=kwargs.get("max_tokens", settings.max_output_tokens),
-                temperature=kwargs.get("temperature", 0.7),
+                temperature=kwargs.get("temperature", settings.generation_temperature),
             )
             return response.content[0].text
         except Exception as exc:

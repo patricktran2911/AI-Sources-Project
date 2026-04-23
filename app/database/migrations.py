@@ -49,6 +49,44 @@ CREATE INDEX IF NOT EXISTS idx_chunks_context_user
     ON knowledge_chunks (context, user_id);
 """
 
+# ── Chat sessions (persistent history) ───────────────────────────────
+
+_CREATE_SESSIONS = """
+CREATE TABLE IF NOT EXISTS chat_sessions (
+    pk          BIGSERIAL PRIMARY KEY,
+    session_id  TEXT        NOT NULL,
+    role        TEXT        NOT NULL,
+    content     TEXT        NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
+_IDX_SESSION = """
+CREATE INDEX IF NOT EXISTS idx_sessions_sid_created
+    ON chat_sessions (session_id, created_at);
+"""
+
+# ── Feedback ──────────────────────────────────────────────────────────
+
+_CREATE_FEEDBACK = """
+CREATE TABLE IF NOT EXISTS feedback (
+    pk          BIGSERIAL PRIMARY KEY,
+    session_id  TEXT,
+    query       TEXT        NOT NULL,
+    answer      TEXT        NOT NULL,
+    rating      TEXT        NOT NULL,
+    comment     TEXT,
+    context     TEXT,
+    feature     TEXT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
+_IDX_FEEDBACK = """
+CREATE INDEX IF NOT EXISTS idx_feedback_created
+    ON feedback (created_at);
+"""
+
 _INSERT = """
 INSERT INTO knowledge_chunks (id, context, text, category, metadata, user_id)
 VALUES ($1, $2, $3, $4, $5, $6)
@@ -63,6 +101,10 @@ async def run_migrations(pool: asyncpg.Pool) -> None:
         await conn.execute(_IDX_GLOBAL)
         await conn.execute(_IDX_USER)
         await conn.execute(_IDX_LOOKUP)
+        await conn.execute(_CREATE_SESSIONS)
+        await conn.execute(_IDX_SESSION)
+        await conn.execute(_CREATE_FEEDBACK)
+        await conn.execute(_IDX_FEEDBACK)
     logger.info("Database migrations applied")
 
 
