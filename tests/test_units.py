@@ -134,6 +134,18 @@ class TestPromptBuilder:
         assert "Rule one." in system_content
         assert "Rule two." in system_content
 
+    def test_voice_rule_is_present_in_system_prompt(self):
+        builder = PromptBuilder()
+        result = builder.build(
+            query="Tell me about yourself.",
+            validated_chunks=[self._make_chunk("Patrick builds backend and AI systems.")],
+            system_instruction="base",
+        )
+        system_content = result.messages[0]["content"]
+        assert "Write like a real person" in system_content
+        assert "AI representative" in system_content
+        assert "generic assistant closers" in system_content
+
     def test_prompt_metrics_are_reported(self):
         builder = PromptBuilder()
         result = builder.build(

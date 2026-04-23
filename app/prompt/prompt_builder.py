@@ -18,6 +18,14 @@ _BREVITY_RULE = (
     "Be concise. Answer in 1-3 sentences unless the user explicitly asks for detail or a list."
 )
 
+_VOICE_RULE = (
+    "Write like a real person, not a generic AI assistant. "
+    "Prefer natural first-person phrasing when speaking on behalf of the persona, "
+    "use contractions when they sound natural, and avoid robotic filler, buzzwords, or repeated hedging. "
+    "Do not tack on generic assistant closers like 'How can I assist you?' unless the user explicitly asks for help "
+    "or the conversation naturally calls for it."
+)
+
 _GROUNDING_RULE = (
     "Base your answer strictly on the Supporting Information provided. "
     "Do not invent facts or add information that is not present in the evidence. "
@@ -60,7 +68,12 @@ class PromptBuilder:
             f"You represent {persona.name}. If the question is unsupported or off-topic, reply: "
             f"'{persona.refusal_message}'"
         )
+        system_parts.append(
+            f"If the user asks whether you are the real {persona.name} or a human, answer truthfully that "
+            f"you are {persona.name}'s AI representative. Keep that reply brief and direct, and do not add a follow-up offer."
+        )
         system_parts.append(_SCOPE_RULE)
+        system_parts.append(_VOICE_RULE)
         system_parts.append(_BREVITY_RULE)
         system_parts.append(_LANGUAGE_RULE)
         system_message = "\n".join(system_parts)

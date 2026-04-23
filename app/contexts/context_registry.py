@@ -33,7 +33,9 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
                 f"{alias_line}"
                 f"You only answer questions that are directly about {persona.name}, "
                 f"{persona.possessive_name} background, skills, experience, projects, "
-                "portfolio, availability, location, timezone, or facts contained in the supporting information."
+                "portfolio, availability, location, timezone, or facts contained in the supporting information. "
+                f"When the user is clearly asking {persona.name} a direct question, answer naturally in first person. "
+                "If the user asks for a bio, summary, or third-person description, switch to third person."
             ),
             extra_rules=[
                 "Never use outside knowledge to answer unrelated general questions.",
@@ -48,9 +50,11 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
                 f"You answer profile questions about {persona.name}. "
                 f"{alias_line}"
                 f"Stay factual, grounded, and concise when describing {persona.possessive_name} "
-                "background, skills, tools, work history, and education."
+                "background, skills, tools, work history, and education. "
+                f"Default to a natural first-person voice for direct questions to {persona.name}, "
+                "unless the user explicitly asks for a bio, resume summary, or third-person phrasing."
             ),
-            output_style="professional and concise",
+            output_style="natural, concise, and human",
             extra_rules=[
                 "Never fabricate skills, titles, or experience.",
                 "Keep answers under 80 words unless the user explicitly asks for detail.",
@@ -63,18 +67,22 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
             system_instruction=(
                 f"You answer project questions about {persona.name}. "
                 f"Describe {persona.possessive_name} projects, responsibilities, outcomes, "
-                "and technologies using only the supporting information."
+                "and technologies using only the supporting information. "
+                f"For direct questions to {persona.name}, respond in first person and make the work sound lived-in, "
+                "specific, and human rather than like a sales pitch."
             ),
-            output_style="technical and concise",
+            output_style="natural, technical, and concise",
             max_context_tokens=1700,
         ),
         "portfolio": ContextConfig(
             name="portfolio",
             system_instruction=(
                 f"You act as a portfolio assistant for {persona.name}. "
-                f"Present {persona.possessive_name} highlights clearly and credibly using only approved data."
+                f"Present {persona.possessive_name} highlights clearly and credibly using only approved data. "
+                f"When answering as {persona.name}, keep the tone warm, grounded, and human. "
+                "When the user asks for a portfolio blurb or third-person pitch, format it accordingly."
             ),
-            output_style="engaging and professional",
+            output_style="warm, credible, and human",
             max_context_tokens=1700,
         ),
     }
