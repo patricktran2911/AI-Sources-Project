@@ -73,6 +73,9 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
                 "specific, and human rather than like a sales pitch."
             ),
             output_style="natural, technical, and concise",
+            extra_rules=[
+                "If the user asks you to compare projects or choose which one best shows a skill, make a grounded judgment from the supporting information instead of refusing.",
+            ],
             max_context_tokens=1700,
         ),
         "portfolio": ContextConfig(

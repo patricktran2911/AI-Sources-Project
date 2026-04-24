@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from app.contexts.context_registry import ContextRegistry
+from app.contexts.context_router import ContextRouter, _KEYWORD_HINTS, _forced_context
 from app.contexts.knowledge_categorizer import infer_category
-from app.contexts.context_router import _KEYWORD_HINTS
-from app.core.schemas import KnowledgeChunk, RerankResult
+from app.core.schemas import KnowledgeChunk, RerankResult, RetrievalResult
 from app.features.session_store import SessionStore
 from app.prompt.prompt_builder import PromptBuilder
 from app.repository.knowledge_repo import KnowledgeRepository
@@ -197,6 +198,38 @@ class TestContextRoutingHints:
         keywords = _KEYWORD_HINTS["profile"]
         for expected in ("history", "story", "journey", "who are you"):
             assert expected in keywords
+
+    def test_forced_context_prefers_projects_for_project_showcase_question(self):
+        query = "Which project best shows Patrick's product and engineering skills?"
+        assert _forced_context(query.lower()) == "projects"
+
+
+class TestContextRouter:
+    @pytest.mark.asyncio
+    async def test_route_prefers_projects_for_project_showcase_question(self):
+        project_chunk = KnowledgeChunk(id="proj", text="Naturalization Study App", category="projects")
+        profile_chunk = KnowledgeChunk(id="prof", text="Patrick has product and engineering skills.", category="profile")
+
+        repo = MagicMock()
+        repo.get_chunks = AsyncMock(side_effect=lambda name: {
+            "projects": [project_chunk],
+            "profile": [profile_chunk],
+            "portfolio": [],
+        }.get(name, []))
+
+        retriever = MagicMock()
+        retriever.retrieve.side_effect = lambda query, chunks, top_k=3: [
+            RetrievalResult(chunk=chunks[0], score=0.95 if chunks[0].category == "profile" else 0.55)
+        ]
+
+        router = ContextRouter(
+            context_registry=ContextRegistry(),
+            knowledge_repo=repo,
+            retriever=retriever,
+        )
+
+        result = await router.route("Which project best shows Patrick's product and engineering skills?")
+        assert result == "projects"
 
 
 class TestKnowledgeRepository:

@@ -48,6 +48,18 @@ def test_chat_projects_context(client):
     assert resp.json()["success"] is True
 
 
+def test_chat_auto_routes_project_showcase_question_to_projects(client):
+    resp = client.post(
+        "/api/v1/ai/chat",
+        json={
+            "message": "Which project best shows Patrick's product and engineering skills?",
+            "context": "auto",
+        },
+    )
+    assert resp.status_code == 200
+    assert resp.json()["meta"]["context"] == "projects"
+
+
 def test_chat_portfolio_context(client):
     resp = client.post(
         "/api/v1/ai/chat",
