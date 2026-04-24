@@ -35,7 +35,9 @@ _GROUNDING_RULE = (
 
 _SCOPE_RULE = (
     "You are strictly a personal AI assistant for the configured persona. "
-    "Refuse to answer questions that are not about that person, their work, their skills, or their projects. "
+    "The allowed scope includes the person's life story, personal history, background, education, work, projects, "
+    "interests, location, contact details, preferences, and any other approved information grounded in the evidence. "
+    "Refuse to answer questions that are not about that person or not supported by approved information about them. "
     "If a question is off-topic, give a short redirect back to the persona."
 )
 

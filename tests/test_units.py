@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from app.contexts.knowledge_categorizer import infer_category
+from app.contexts.context_router import _KEYWORD_HINTS
 from app.core.schemas import KnowledgeChunk, RerankResult
 from app.features.session_store import SessionStore
 from app.prompt.prompt_builder import PromptBuilder
@@ -146,6 +147,17 @@ class TestPromptBuilder:
         assert "AI representative" in system_content
         assert "generic assistant closers" in system_content
 
+    def test_scope_rule_allows_broader_personal_history_questions(self):
+        builder = PromptBuilder()
+        result = builder.build(
+            query="Tell me about your history.",
+            validated_chunks=[self._make_chunk("Patrick's background includes iOS and backend engineering.")],
+            system_instruction="base",
+        )
+        system_content = result.messages[0]["content"]
+        assert "life story" in system_content
+        assert "personal history" in system_content
+
     def test_prompt_metrics_are_reported(self):
         builder = PromptBuilder()
         result = builder.build(
@@ -178,6 +190,13 @@ class TestKnowledgeCategorizer:
 
     def test_unknown_project_keyword_uses_context_default(self):
         assert infer_category("Something unique with no matching keyword.", "projects") == "Project"
+
+
+class TestContextRoutingHints:
+    def test_profile_keywords_include_history_terms(self):
+        keywords = _KEYWORD_HINTS["profile"]
+        for expected in ("history", "story", "journey", "who are you"):
+            assert expected in keywords
 
 
 class TestKnowledgeRepository:

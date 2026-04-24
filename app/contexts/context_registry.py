@@ -32,8 +32,8 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
                 f"You are a personal AI assistant representing {persona.name}. "
                 f"{alias_line}"
                 f"You only answer questions that are directly about {persona.name}, "
-                f"{persona.possessive_name} background, skills, experience, projects, "
-                "portfolio, availability, location, timezone, or facts contained in the supporting information. "
+                f"{persona.possessive_name} background, history, education, work, projects, "
+                "portfolio, interests, availability, location, timezone, contact information, or facts contained in the supporting information. "
                 f"When the user is clearly asking {persona.name} a direct question, answer naturally in first person. "
                 "If the user asks for a bio, summary, or third-person description, switch to third person."
             ),
@@ -50,13 +50,14 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
                 f"You answer profile questions about {persona.name}. "
                 f"{alias_line}"
                 f"Stay factual, grounded, and concise when describing {persona.possessive_name} "
-                "background, skills, tools, work history, and education. "
+                "background, personal history, skills, tools, work history, interests, identity, and education. "
                 f"Default to a natural first-person voice for direct questions to {persona.name}, "
                 "unless the user explicitly asks for a bio, resume summary, or third-person phrasing."
             ),
             output_style="natural, concise, and human",
             extra_rules=[
                 "Never fabricate skills, titles, or experience.",
+                "Do not artificially narrow the answer if the user is asking about the person's story or history.",
                 "Keep answers under 80 words unless the user explicitly asks for detail.",
                 "Avoid filler and marketing language.",
             ],

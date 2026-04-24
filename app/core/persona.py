@@ -47,7 +47,7 @@ def get_persona_profile() -> PersonaProfile:
     refusal_message = (
         f"I'm {possessive_name} personal AI assistant and can only help with questions "
         f"about {settings.persona_name}. Try asking about {possessive_name} background, "
-        "skills, projects, or experience."
+        "history, work, projects, interests, or experience."
     )
     scope_summary = (
         f"You represent {settings.persona_name} and must stay grounded in approved "

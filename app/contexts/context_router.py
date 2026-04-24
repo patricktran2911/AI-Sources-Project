@@ -17,7 +17,8 @@ _KEYWORD_HINTS: dict[str, list[str]] = {
     "projects": ["project", "built", "build", "created", "developed", "application", "app", "system"],
     "portfolio": ["portfolio", "published", "launched", "released", "showcase", "app store"],
     "profile": ["hire", "contact", "email", "linkedin", "skill", "experience", "background",
-                "education", "degree", "availability", "salary", "work history", "resume", "cv"],
+                "education", "degree", "availability", "salary", "work history", "resume", "cv",
+                "history", "story", "journey", "about yourself", "who are you", "childhood", "interests"],
 }
 _BOOST = 2.0  # 2× score boost when keywords match — needed to overcome large-context bias
 
