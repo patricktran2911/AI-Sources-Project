@@ -376,11 +376,11 @@ Remove-SSHSession -SessionId $sid | Out-Null
 ### Server Directory Layout
 
 ```
-/root/AI-Sources-Project/     ← project root (cloned from GitHub)
-  .env                        ← live config (NOT in git)
-  .venv/                      ← Python virtualenv
-  data/                       ← knowledge JSON files
-  app/                        ← application code
+/root/AI-Sources-Project/       <-- repo root (cloned from GitHub)
+  .env                          <-- live config (NOT in git)
+  .venv/                        <-- Python virtualenv
+  data/                         <-- knowledge JSON files
+  app/                          <-- application code
   main.py
 ```
 
@@ -471,11 +471,13 @@ active
 ### Local Development
 
 ```powershell
-# Run locally (uses conda base env)
-conda run -n base python main.py
+cd "E:\DevProj\AI Personal Projects\AI Sources Project"
+
+# Run locally
+py -3.12 -m uvicorn main:app --reload
 
 # Run tests
-conda run -n base python -m pytest tests/ -v
+py -3.12 -m pytest tests -q
 ```
 
 Local server runs at: `http://127.0.0.1:8000`

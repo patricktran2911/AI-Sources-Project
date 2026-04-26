@@ -145,6 +145,11 @@ def create_app() -> FastAPI:
     async def serve_test_lab():
         return FileResponse(Path(__file__).parent / "static" / "test_all.html")
 
+    # Browser test page for the chat -> speech workflow
+    @app.get("/voice-test", include_in_schema=False)
+    async def serve_voice_test():
+        return FileResponse(Path(__file__).parent / "static" / "test_voice.html")
+
     return app
 
 

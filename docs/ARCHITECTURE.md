@@ -5,7 +5,7 @@
 Keep the product narrow and dependable:
 
 - one persona
-- one public AI feature: chat
+- one public AI feature: chat, with speech output support for chatbot answers
 - one grounded answer path
 - predictable OpenAI cost per request
 
@@ -22,7 +22,7 @@ HTTP request
      -> relevance validation
      -> prompt builder + budget compaction
      -> provider call
-  -> JSON or SSE response
+  -> JSON, SSE response, or streaming audio response
 ```
 
 ## Main Modules
@@ -40,6 +40,9 @@ HTTP request
 | `app/prompt/prompt_builder.py` | Prompt assembly |
 | `app/prompt/prompt_budget.py` | History and evidence compaction |
 | `app/providers/` | LLM provider adapters |
+| `app/providers/openai_speech_provider.py` | OpenAI text-to-speech provider adapter |
+| `app/providers/elevenlabs_speech_provider.py` | ElevenLabs cloned-voice provider adapter |
+| `app/providers/local_speech_provider.py` | Self-hosted local voice-cloning provider adapter |
 
 ## Cost-Control Design
 
@@ -51,6 +54,10 @@ The app avoids unnecessary paid generation in four places:
 4. `prompt_budget.py` trims history and evidence before generation.
 
 Knowledge ingestion is also cheap by design because category labels are generated locally in `app/contexts/knowledge_categorizer.py`.
+
+Speech output is intentionally a second step after chat. Clients call `/chat` to get the grounded answer, then call `/speech` with that answer text when audio playback is needed.
+
+Self-hosted voice cloning is isolated behind `LocalSpeechProvider`, which calls a separate local F5-TTS service instead of loading heavy ML models into the main backend process.
 
 ## Data Model
 

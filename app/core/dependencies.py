@@ -26,6 +26,7 @@ from app.core.config import Settings, get_settings
 from app.orchestration.orchestrator import Orchestrator
 from app.repository.knowledge_repo import KnowledgeRepository
 from app.providers.base import BaseLLMProvider
+from app.providers.speech_base import BaseSpeechProvider
 from app.features.session_store import SessionStore
 from app.features.registry import FeatureRegistry
 from app.contexts.context_registry import ContextRegistry
@@ -51,6 +52,16 @@ def _get_knowledge_repo(request: Request) -> KnowledgeRepository:
 
 def _get_provider(request: Request) -> BaseLLMProvider:
     return request.app.state.provider
+
+
+def _get_speech_provider(request: Request) -> BaseSpeechProvider:
+    provider = getattr(request.app.state, "speech_provider", None)
+    if provider is None:
+        from app.providers.speech_factory import get_speech_provider
+
+        provider = get_speech_provider()
+        request.app.state.speech_provider = provider
+    return provider
 
 
 def _get_session_store(request: Request) -> SessionStore:
@@ -85,6 +96,7 @@ SettingsDep       = Annotated[Settings,         Depends(get_config)]
 OrchestratorDep   = Annotated[Orchestrator,     Depends(_get_orchestrator)]
 KnowledgeRepoDep  = Annotated[KnowledgeRepository, Depends(_get_knowledge_repo)]
 ProviderDep       = Annotated[BaseLLMProvider,  Depends(_get_provider)]
+SpeechProviderDep = Annotated[BaseSpeechProvider, Depends(_get_speech_provider)]
 SessionStoreDep   = Annotated[SessionStore,     Depends(_get_session_store)]
 FeatureRegistryDep = Annotated[FeatureRegistry, Depends(_get_feature_registry)]
 ContextRegistryDep = Annotated[ContextRegistry, Depends(_get_context_registry)]

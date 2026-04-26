@@ -11,9 +11,9 @@ FastAPI backend for a single purpose: a personal AI agent chatbot that represent
 
 ## Product Boundary
 
-This service is intentionally chatbot-only.
+This service is intentionally chatbot-first, with speech output for approved chatbot answers.
 
-- Public AI endpoints: `/chat`, `/chat/stream`
+- Public AI endpoints: `/chat`, `/chat/stream`, `/speech`
 - Support endpoints: `/knowledge/*`, `/feedback`, `/contexts`, `/features`, `/health`, `/info`
 - Retired endpoints: `/summarize`, `/suggest`
 
@@ -39,7 +39,7 @@ Client
      -> Relevance validator
      -> Prompt builder + prompt budget
      -> LLM provider
-  -> JSON or SSE response
+  -> JSON, SSE response, or streaming audio
 ```
 
 ## Quick Start
@@ -80,6 +80,7 @@ Useful local URLs:
 
 - Chat UI: `http://localhost:8000/`
 - QA lab: `http://localhost:8000/test`
+- Voice test: `http://localhost:8000/voice-test`
 - OpenAPI: `http://localhost:8000/docs`
 - Health: `http://localhost:8000/api/v1/health`
 
@@ -91,6 +92,19 @@ Useful local URLs:
 | `PERSONA_ALIASES` | Alternate names the chatbot should recognize |
 | `LLM_PROVIDER` | `openai`, `anthropic`, or `gemini` |
 | `OPENAI_MODEL` | OpenAI chat model |
+| `SPEECH_PROVIDER` | Speech synthesis provider: `openai`, `elevenlabs`, or `local` |
+| `OPENAI_TTS_MODEL` | OpenAI speech model |
+| `OPENAI_TTS_VOICE` | Built-in OpenAI voice name |
+| `OPENAI_TTS_VOICE_ID` | Optional custom OpenAI voice ID once your voice is created |
+| `OPENAI_TTS_INSTRUCTIONS` | Default delivery style for generated speech |
+| `ELEVENLABS_API_KEY` | ElevenLabs API key when using `SPEECH_PROVIDER=elevenlabs` |
+| `ELEVENLABS_VOICE_ID` | ElevenLabs cloned voice ID |
+| `ELEVENLABS_MODEL` | ElevenLabs speech model |
+| `LOCAL_TTS_URL` | Local self-hosted TTS server URL when using `SPEECH_PROVIDER=local` |
+| `LOCAL_TTS_REFERENCE_AUDIO_PATH` | Reference voice sample path for local voice cloning |
+| `LOCAL_TTS_REFERENCE_TEXT` | Transcript of the reference voice sample |
+| `LOCAL_TTS_MODEL` | Local F5-TTS model name |
+| `MAX_SPEECH_INPUT_CHARS` | Max text size accepted by `/speech` |
 | `MAX_CONTEXT_TOKENS` | Prompt token budget before generation |
 | `MAX_OUTPUT_TOKENS` | Completion budget |
 | `MAX_USER_QUERY_CHARS` | Max incoming user message size |
@@ -110,6 +124,7 @@ py -3.12 -m pytest tests -q
 Current coverage focus:
 
 - chat and streaming behavior
+- speech output behavior
 - knowledge ingestion and deletion
 - prompt budgeting and compaction
 - guardrails for prompt injection
@@ -118,8 +133,11 @@ Current coverage focus:
 ## Team Docs
 
 - `docs/ARCHITECTURE.md`
+- `docs/LOCAL_TTS.md`
 - `docs/TEAM_GUIDE.md`
 - `docs/OPERATIONS.md`
+
+Local GPU-only services live in the sibling `E:\DevProj\AI Personal Projects\Self-Host` repo and are not deployed with this backend.
 
 ## Deployment
 

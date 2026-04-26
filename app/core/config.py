@@ -50,6 +50,30 @@ class Settings(BaseSettings):
     max_evidence_chunk_chars: int = 420
     generation_temperature: float = 0.2
 
+    # --- Speech / Voice Output ---
+    speech_provider: str = "openai"  # openai | elevenlabs | local
+    openai_tts_model: str = "gpt-4o-mini-tts"
+    openai_tts_voice: str = "alloy"
+    openai_tts_voice_id: str = ""
+    openai_tts_instructions: str = "Speak naturally, warmly, and conversationally."
+    openai_tts_response_format: str = "mp3"
+    elevenlabs_api_key: str = ""
+    elevenlabs_voice_id: str = ""
+    elevenlabs_model: str = "eleven_multilingual_v2"
+    elevenlabs_output_format: str = "mp3_44100_128"
+    elevenlabs_stability: float = 0.4
+    elevenlabs_similarity_boost: float = 0.85
+    elevenlabs_style: float = 0.0
+    elevenlabs_use_speaker_boost: bool = True
+    local_tts_url: str = "http://127.0.0.1:7861/v1/voice/synthesize"
+    local_tts_api_key: str = ""
+    local_tts_reference_audio_path: str = ""
+    local_tts_reference_text: str = ""
+    local_tts_model: str = "F5TTS_v1_Base"
+    local_tts_timeout_seconds: float = 300.0
+    speech_chunk_size: int = 4096
+    max_speech_input_chars: int = 4096
+
     # --- Rate Limiting ---
     rate_limit_max_requests: int = 20
     rate_limit_window_seconds: int = 60

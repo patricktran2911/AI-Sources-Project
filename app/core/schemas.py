@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -61,6 +61,44 @@ class ChatResponse(BaseModel):
     success: bool = True
     data: dict[str, Any] = Field(default_factory=dict)
     meta: dict[str, Any] = Field(default_factory=dict)
+
+
+class SpeechRequest(BaseModel):
+    """Request body for POST /speech."""
+
+    text: str = Field(..., min_length=1, description="Text to synthesize into speech")
+    response_format: Literal["mp3", "opus", "aac", "flac", "wav", "pcm"] = Field(
+        "mp3",
+        description="Encoded audio format to return",
+    )
+    voice: str | None = Field(
+        None,
+        min_length=1,
+        max_length=128,
+        description="Optional built-in voice name or custom voice ID override",
+    )
+    instructions: str | None = Field(
+        None,
+        max_length=600,
+        description="Optional delivery instructions for the speech model",
+    )
+    speed: float | None = Field(
+        None,
+        ge=0.25,
+        le=4.0,
+        description="Optional speech speed multiplier",
+    )
+
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        cleaned = " ".join(value.strip().split())
+        if not cleaned:
+            raise ValueError("Text cannot be empty.")
+        limit = get_settings().max_speech_input_chars
+        if len(cleaned) > limit:
+            raise ValueError(f"Text exceeds the {limit}-character speech synthesis limit.")
+        return cleaned
 
 
 class KnowledgeChunk(BaseModel):

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Chat Test</title>
+  <style>
+    :root {
+      --bg: #eef3ef;
+      --panel: #fbfdf8;
+      --panel-2: #e1eadf;
+      --ink: #172018;
+      --muted: #66736a;
+      --accent: #1d5b46;
+      --accent-2: #bc6b25;
+      --line: #c8d4c7;
+      --danger: #a83d31;
+      --shadow: 0 18px 34px rgba(22, 33, 24, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(29, 91, 70, 0.12), transparent 34%),
+        linear-gradient(180deg, #f7f8f3 0%, var(--bg) 55%, #e6eee7 100%);
+    }
+
+    .page {
+      width: min(1180px, calc(100vw - 32px));
+      min-height: calc(100vh - 40px);
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: 390px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .panel {
+      background: rgba(251, 253, 248, 0.94);
+      border: 1px solid rgba(200, 212, 199, 0.95);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .controls {
+      padding: 24px;
+      align-self: start;
+    }
+
+    h1, h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: 38px;
+      line-height: 1;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 13px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    input, textarea, select, button {
+      font: inherit;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fffef9;
+      color: var(--ink);
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 116px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(29, 91, 70, 0.12);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 13px 14px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      transform: none;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #f8fff8;
+    }
+
+    .secondary {
+      background: rgba(188, 107, 37, 0.14);
+      color: var(--accent-2);
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+    }
+
+    .top {
+      padding: 24px 26px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .status {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .status.error { color: var(--danger); }
+    .status.loading { color: var(--accent); }
+
+    .answer {
+      padding: 26px;
+      overflow-y: auto;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      min-height: 360px;
+      background:
+        linear-gradient(180deg, rgba(251, 253, 248, 0.78), rgba(238, 243, 239, 0.55)),
+        repeating-linear-gradient(90deg, rgba(29, 91, 70, 0.035) 0 1px, transparent 1px 52px);
+    }
+
+    .empty {
+      color: var(--muted);
+    }
+
+    .audio-bar {
+      padding: 18px 26px 24px;
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+    }
+
+    audio {
+      width: 100%;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .chip {
+      padding: 7px 9px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page {
+        width: calc(100vw - 20px);
+        margin: 10px auto;
+      }
+
+      .row, .actions, .audio-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .top {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel controls">
+      <h1>Voice Chat Test</h1>
+
+      <div class="row">
+        <div class="field">
+          <label for="context">Context</label>
+          <select id="context">
+            <option value="auto">auto</option>
+            <option value="general">general</option>
+            <option value="profile">profile</option>
+            <option value="projects">projects</option>
+            <option value="portfolio">portfolio</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="format">Format</label>
+          <select id="format">
+            <option value="mp3">mp3</option>
+            <option value="wav">wav</option>
+            <option value="opus">opus</option>
+            <option value="aac">aac</option>
+            <option value="flac">flac</option>
+            <option value="pcm">pcm</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="sessionId">Session ID</label>
+        <input id="sessionId" type="text" />
+      </div>
+
+      <div class="field">
+        <label for="userId">User ID</label>
+        <input id="userId" type="text" placeholder="optional" />
+      </div>
+
+      <div class="field">
+        <label for="voice">Voice Override</label>
+        <input id="voice" type="text" placeholder="optional built-in voice or voice_..." />
+      </div>
+
+      <div class="field">
+        <label for="instructions">Voice Instructions</label>
+        <input id="instructions" type="text" placeholder="optional delivery style" />
+      </div>
+
+      <div class="field">
+        <label for="prompt">Prompt</label>
+        <textarea id="prompt">Tell me about Patrick's backend and AI experience.</textarea>
+      </div>
+
+      <div class="actions">
+        <button id="askBtn" class="primary" type="button">Ask</button>
+        <button id="speakBtn" class="secondary" type="button">Speak</button>
+      </div>
+    </section>
+
+    <section class="panel main">
+      <div class="top">
+        <h2>Answer Audio</h2>
+        <p id="status" class="status">Ready.</p>
+      </div>
+      <article id="answer" class="answer empty">The chatbot answer will appear here.</article>
+      <div class="audio-bar">
+        <audio id="player" controls></audio>
+        <div id="meta" class="meta"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const askBtn = document.getElementById("askBtn");
+    const speakBtn = document.getElementById("speakBtn");
+    const answerEl = document.getElementById("answer");
+    const statusEl = document.getElementById("status");
+    const player = document.getElementById("player");
+    const metaEl = document.getElementById("meta");
+
+    let lastAnswer = "";
+    let lastObjectUrl = "";
+
+    function ensureSession() {
+      const sessionInput = document.getElementById("sessionId");
+      if (!sessionInput.value.trim()) {
+        sessionInput.value = "voice-" + Math.random().toString(36).slice(2, 10);
+      }
+    }
+
+    function setStatus(text, kind = "") {
+      statusEl.textContent = text;
+      statusEl.className = "status";
+      if (kind) statusEl.classList.add(kind);
+    }
+
+    function setBusy(isBusy) {
+      askBtn.disabled = isBusy;
+      speakBtn.disabled = isBusy;
+    }
+
+    function setMeta(items) {
+      metaEl.innerHTML = "";
+      items.forEach((item) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = item;
+        metaEl.appendChild(chip);
+      });
+    }
+
+    async function askChat() {
+      ensureSession();
+      const payload = {
+        message: document.getElementById("prompt").value,
+        context: document.getElementById("context").value,
+        session_id: document.getElementById("sessionId").value || null,
+        user_id: document.getElementById("userId").value || null,
+      };
+
+      const response = await fetch("/api/v1/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        throw new Error(body.detail || body.error || "Chat request failed.");
+      }
+
+      lastAnswer = body.data.answer || "";
+      answerEl.textContent = lastAnswer;
+      answerEl.classList.remove("empty");
+
+      const meta = [
+        "context: " + (body.meta.context || payload.context),
+        "supported: " + String(body.data.supported !== false),
+      ];
+      if (body.meta.prompt_budget?.estimated_prompt_tokens) {
+        meta.push("prompt: " + body.meta.prompt_budget.estimated_prompt_tokens + " tokens");
+      }
+      setMeta(meta);
+      return body;
+    }
+
+    async function speakAnswer() {
+      if (!lastAnswer.trim()) {
+        await askChat();
+      }
+
+      const payload = {
+        text: lastAnswer,
+        response_format: document.getElementById("format").value,
+      };
+
+      const voice = document.getElementById("voice").value.trim();
+      const instructions = document.getElementById("instructions").value.trim();
+      if (voice) payload.voice = voice;
+      if (instructions) payload.instructions = instructions;
+
+      const response = await fetch("/api/v1/ai/speech", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || "Speech request failed.");
+      }
+
+      const audioBlob = await response.blob();
+      if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
+      lastObjectUrl = URL.createObjectURL(audioBlob);
+      player.src = lastObjectUrl;
+      await player.play();
+
+      setMeta([
+        "audio: " + (response.headers.get("X-Audio-Format") || payload.response_format),
+        "provider: " + (response.headers.get("X-Audio-Provider") || "speech"),
+        "bytes: " + audioBlob.size,
+      ]);
+    }
+
+    askBtn.addEventListener("click", async () => {
+      setBusy(true);
+      setStatus("Asking chatbot...", "loading");
+      try {
+        await askChat();
+        setStatus("Answer ready.");
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || "Request failed.", "error");
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    speakBtn.addEventListener("click", async () => {
+      setBusy(true);
+      setStatus("Generating speech...", "loading");
+      try {
+        await speakAnswer();
+        setStatus("Playing.");
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || "Request failed.", "error");
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    ensureSession();
+  </script>
+</body>
+</html>
+
