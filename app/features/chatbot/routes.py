@@ -16,9 +16,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/chat", response_model=ChatResponse)
-async def chat(body: ChatRequest, orchestrator: OrchestratorDep, session_store: SessionStoreDep):
-    """Return a non-streaming answer from the personal chatbot."""
+async def run_chat_request(body: ChatRequest, orchestrator, session_store) -> ChatResponse:
+    """Run the shared non-streaming personal chatbot flow."""
     context = body.context
     if context == "auto":
         context = await orchestrator.detect_context(body.message)
@@ -40,6 +39,18 @@ async def chat(body: ChatRequest, orchestrator: OrchestratorDep, session_store: 
         )
 
     return ChatResponse(success=response.success, data=response.data, meta=response.meta)
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(body: ChatRequest, orchestrator: OrchestratorDep, session_store: SessionStoreDep):
+    """Return a non-streaming answer from the personal chatbot."""
+    return await run_chat_request(body, orchestrator, session_store)
+
+
+@router.post("/text-to-text", response_model=ChatResponse)
+async def text_to_text(body: ChatRequest, orchestrator: OrchestratorDep, session_store: SessionStoreDep):
+    """Explicit text-in/text-out alias for frontend mode routing."""
+    return await run_chat_request(body, orchestrator, session_store)
 
 
 @router.post("/chat/stream")

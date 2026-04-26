@@ -42,6 +42,14 @@ class SpeechProviderError(AppError):
         super().__init__(msg, status_code=502)
 
 
+class TranscriptionProviderError(AppError):
+    def __init__(self, provider: str, detail: str = ""):
+        msg = f"Transcription provider '{provider}' error"
+        if detail:
+            msg += f": {detail}"
+        super().__init__(msg, status_code=502)
+
+
 class RetrievalError(AppError):
     def __init__(self, detail: str = ""):
         super().__init__(f"Retrieval failed: {detail}", status_code=500)

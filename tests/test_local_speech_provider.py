@@ -16,7 +16,7 @@ def _settings():
         local_tts_api_key="local-secret",
         local_tts_reference_audio_path="C:/voice/ref.wav",
         local_tts_reference_text="This is the reference transcript.",
-        local_tts_model="F5TTS_v1_Base",
+        local_tts_model="",
         local_tts_timeout_seconds=30.0,
         speech_chunk_size=4096,
     )
@@ -78,6 +78,5 @@ async def test_local_speech_provider_posts_reference_voice_payload(monkeypatch):
         "response_format": "mp3",
         "reference_audio_path": "C:/voice/ref.wav",
         "reference_text": "This is the reference transcript.",
-        "model": "F5TTS_v1_Base",
         "speed": 1.05,
     }

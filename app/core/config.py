@@ -55,7 +55,10 @@ class Settings(BaseSettings):
     openai_tts_model: str = "gpt-4o-mini-tts"
     openai_tts_voice: str = "alloy"
     openai_tts_voice_id: str = ""
-    openai_tts_instructions: str = "Speak naturally, warmly, and conversationally."
+    openai_tts_instructions: str = (
+        "Speak English slowly and clearly with a natural Vietnamese accent, "
+        "like a Vietnamese speaker speaking English. Keep it warm, calm, and easy to understand."
+    )
     openai_tts_response_format: str = "mp3"
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = ""
@@ -69,10 +72,20 @@ class Settings(BaseSettings):
     local_tts_api_key: str = ""
     local_tts_reference_audio_path: str = ""
     local_tts_reference_text: str = ""
-    local_tts_model: str = "F5TTS_v1_Base"
+    local_tts_model: str = ""
     local_tts_timeout_seconds: float = 300.0
+    speech_default_speed: float | None = 0.7
+    speech_default_instructions: str = (
+        "Speak English slowly and clearly with a natural Vietnamese accent, "
+        "like a Vietnamese speaker speaking English. Keep it warm, calm, and easy to understand."
+    )
+    speech_punctuation_pauses_enabled: bool = True
     speech_chunk_size: int = 4096
     max_speech_input_chars: int = 4096
+    transcription_provider: str = "openai"  # openai
+    openai_stt_model: str = "gpt-4o-mini-transcribe"
+    openai_stt_prompt: str = "Names that may appear: Patrick Tran, Phuc, Nguyen, Bin."
+    max_speech_upload_bytes: int = 25 * 1024 * 1024
 
     # --- Rate Limiting ---
     rate_limit_max_requests: int = 20

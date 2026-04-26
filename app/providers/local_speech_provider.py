@@ -36,8 +36,9 @@ class LocalSpeechProvider(BaseSpeechProvider):
             "response_format": options.response_format,
             "reference_audio_path": self._reference_audio_path,
             "reference_text": self._reference_text,
-            "model": self._model,
         }
+        if self._model:
+            payload["model"] = self._model
         if options.voice:
             payload["voice"] = options.voice
         if options.instructions:
@@ -66,4 +67,3 @@ class LocalSpeechProvider(BaseSpeechProvider):
         except Exception as exc:
             logger.exception("Local speech synthesis error")
             raise SpeechProviderError("local", str(exc)) from exc
-

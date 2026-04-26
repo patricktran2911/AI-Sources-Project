@@ -11,11 +11,23 @@ FastAPI backend for a single purpose: a personal AI agent chatbot that represent
 
 ## Product Boundary
 
-This service is intentionally chatbot-first, with speech output for approved chatbot answers.
+This service is intentionally chatbot-first, with text and speech modes for approved chatbot answers.
 
-- Public AI endpoints: `/chat`, `/chat/stream`, `/speech`
+- Public AI endpoints: `/chat`, `/chat/stream`, `/text-to-text`, `/speech`, `/speech-to-text`, `/text-to-speech`, `/speech-to-speech`
 - Support endpoints: `/knowledge/*`, `/feedback`, `/contexts`, `/features`, `/health`, `/info`
 - Retired endpoints: `/summarize`, `/suggest`
+
+## Text And Speech Endpoints
+
+All routes are under `/api/v1/ai`.
+
+| Endpoint | Input | Output |
+|---|---|---|
+| `POST /text-to-text` | JSON text message | JSON chatbot answer |
+| `POST /speech` | JSON text to read aloud | Streaming audio only |
+| `POST /speech-to-text` | Multipart audio file | JSON transcript |
+| `POST /text-to-speech` | JSON text message | JSON answer plus base64 audio |
+| `POST /speech-to-speech` | Multipart audio file | JSON transcript, answer, and base64 audio |
 
 ## Core Guardrails
 
@@ -103,8 +115,12 @@ Useful local URLs:
 | `LOCAL_TTS_URL` | Local self-hosted TTS server URL when using `SPEECH_PROVIDER=local` |
 | `LOCAL_TTS_REFERENCE_AUDIO_PATH` | Reference voice sample path for local voice cloning |
 | `LOCAL_TTS_REFERENCE_TEXT` | Transcript of the reference voice sample |
-| `LOCAL_TTS_MODEL` | Local F5-TTS model name |
+| `LOCAL_TTS_MODEL` | Optional local model override; leave empty so Self-Host chooses CosyVoice/F5 |
 | `MAX_SPEECH_INPUT_CHARS` | Max text size accepted by `/speech` |
+| `TRANSCRIPTION_PROVIDER` | Speech-to-text provider, currently `openai` |
+| `OPENAI_STT_MODEL` | OpenAI transcription model |
+| `OPENAI_STT_PROMPT` | Optional transcription hint text for names/terms |
+| `MAX_SPEECH_UPLOAD_BYTES` | Max uploaded audio size for speech-to-text routes |
 | `MAX_CONTEXT_TOKENS` | Prompt token budget before generation |
 | `MAX_OUTPUT_TOKENS` | Completion budget |
 | `MAX_USER_QUERY_CHARS` | Max incoming user message size |

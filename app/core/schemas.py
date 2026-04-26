@@ -101,6 +101,32 @@ class SpeechRequest(BaseModel):
         return cleaned
 
 
+class ChatSpeechRequest(ChatRequest):
+    """Request body for generating a chatbot answer and audio together."""
+
+    response_format: Literal["mp3", "opus", "aac", "flac", "wav", "pcm"] = Field(
+        "mp3",
+        description="Encoded audio format to include in the response",
+    )
+    voice: str | None = Field(
+        None,
+        min_length=1,
+        max_length=128,
+        description="Optional built-in voice name or custom voice ID override",
+    )
+    instructions: str | None = Field(
+        None,
+        max_length=600,
+        description="Optional delivery instructions for the speech model",
+    )
+    speed: float | None = Field(
+        None,
+        ge=0.25,
+        le=4.0,
+        description="Optional speech speed multiplier",
+    )
+
+
 class KnowledgeChunk(BaseModel):
     """A single piece of knowledge stored in the data layer."""
 

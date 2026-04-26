@@ -5,7 +5,7 @@
 Keep the product narrow and dependable:
 
 - one persona
-- one public AI feature: chat, with speech output support for chatbot answers
+- one public AI feature: chat, with text and speech I/O modes for chatbot answers
 - one grounded answer path
 - predictable OpenAI cost per request
 
@@ -22,7 +22,7 @@ HTTP request
      -> relevance validation
      -> prompt builder + budget compaction
      -> provider call
-  -> JSON, SSE response, or streaming audio response
+  -> JSON, SSE response, streaming audio response, or JSON answer plus audio
 ```
 
 ## Main Modules
@@ -57,7 +57,9 @@ Knowledge ingestion is also cheap by design because category labels are generate
 
 Speech output is intentionally a second step after chat. Clients call `/chat` to get the grounded answer, then call `/speech` with that answer text when audio playback is needed.
 
-Self-hosted voice cloning is isolated behind `LocalSpeechProvider`, which calls a separate local F5-TTS service instead of loading heavy ML models into the main backend process.
+For one-call voice UX, clients can call `/text-to-speech` to get the chatbot answer and base64 audio together, or `/speech-to-speech` to upload user audio, transcribe it, generate the grounded answer, and receive answer audio in the same JSON response.
+
+Self-hosted voice cloning is isolated behind `LocalSpeechProvider`, which calls the separate `Self-Host` service instead of loading heavy ML models into the main backend process. That service now prefers CosyVoice for persona-style speech and keeps F5-TTS as a fallback.
 
 ## Data Model
 

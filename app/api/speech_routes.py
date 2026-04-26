@@ -40,14 +40,17 @@ MEDIA_TYPES = {
 )
 async def speech(body: SpeechRequest, speech_provider: SpeechProviderDep):
     """Stream synthesized speech audio for an existing chatbot answer."""
+    settings = get_settings()
+    speed = body.speed if body.speed is not None else settings.speech_default_speed
+    instructions = body.instructions or settings.speech_default_instructions
+
     options = SpeechOptions(
         response_format=body.response_format,
         voice=body.voice,
-        instructions=body.instructions,
-        speed=body.speed,
+        instructions=instructions,
+        speed=speed,
     )
     media_type = MEDIA_TYPES[body.response_format]
-    settings = get_settings()
 
     return StreamingResponse(
         speech_provider.synthesize_stream(body.text, options),
@@ -57,6 +60,8 @@ async def speech(body: SpeechRequest, speech_provider: SpeechProviderDep):
             "Content-Disposition": f'inline; filename="chatbot-speech.{body.response_format}"',
             "X-Audio-Provider": settings.speech_provider,
             "X-Audio-Format": body.response_format,
+            "X-Voice-Speed": str(speed) if speed is not None else "",
+            "X-Voice-Style": instructions,
+            "X-Voice-Pauses": "punctuation" if settings.speech_punctuation_pauses_enabled else "off",
         },
     )
-

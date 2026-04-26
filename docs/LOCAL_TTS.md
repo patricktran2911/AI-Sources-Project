@@ -2,7 +2,7 @@
 
 This project can use a self-hosted voice-cloning service behind the existing `/api/v1/ai/speech` endpoint.
 
-The first supported local engine is F5-TTS. The official F5-TTS project supports zero-shot voice cloning from a reference audio clip and transcript through `f5-tts_infer-cli`.
+The recommended local engine is CosyVoice through the sibling `Self-Host` repo. F5-TTS remains available there as a fallback for local development or when the CosyVoice runtime is not running.
 
 ## Backend Flow
 
@@ -12,7 +12,7 @@ Frontend
   -> POST /api/v1/ai/speech
   -> LocalSpeechProvider
   -> Self-Host /v1/voice/synthesize
-  -> f5-tts_infer-cli
+  -> CosyVoice runtime, or F5-TTS fallback
   -> audio bytes
 ```
 
@@ -26,7 +26,7 @@ $env:TEMP\ai-sources-voice-samples\patrick_voice_sample.wav
 
 Use the exact transcript for the reference audio in the sibling `Self-Host` repo's `.env`. Better transcript quality usually means better voice cloning.
 
-## Install F5-TTS
+## Install Self-Host Voice Service
 
 Use the standalone PC voice-server project because its ML dependencies are heavier than the main backend:
 
@@ -39,7 +39,17 @@ pip install torch==2.8.0+cu128 torchaudio==2.8.0+cu128 --extra-index-url https:/
 pip install -r requirements.txt
 ```
 
-For NVIDIA GPU, install the PyTorch build that matches your CUDA version before installing `f5-tts`.
+For NVIDIA GPU, install the PyTorch build that matches your CUDA version before installing voice dependencies.
+
+For the better personal chatbot voice, run the official CosyVoice FastAPI runtime beside the `Self-Host` app:
+
+```powershell
+cd "E:\DevProj\AI Personal Projects\CosyVoice"
+conda activate cosyvoice
+python runtime\python\fastapi\server.py --port 50000 --model_dir pretrained_models\Fun-CosyVoice3-0.5B
+```
+
+Keep `VOICE_ENGINE=auto` in `Self-Host\.env` while testing. It prefers CosyVoice and falls back to F5-TTS if port `50000` is not available.
 
 ## Configure Main Backend
 
@@ -51,10 +61,10 @@ LOCAL_TTS_URL=http://127.0.0.1:7861/v1/voice/synthesize
 LOCAL_TTS_API_KEY=the-same-value-as-LOCAL_AI_API_KEY
 LOCAL_TTS_REFERENCE_AUDIO_PATH=
 LOCAL_TTS_REFERENCE_TEXT=
-LOCAL_TTS_MODEL=F5TTS_v1_Base
+LOCAL_TTS_MODEL=
 ```
 
-When using the standalone `Self-Host` project, reference audio and reference text are configured inside that project. This backend only needs the server URL and API key.
+When using the standalone `Self-Host` project, reference audio, reference text, engine, and model are configured inside that project. This backend only needs the server URL and API key.
 
 ## Start The Local TTS Server
 
