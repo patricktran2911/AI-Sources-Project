@@ -34,8 +34,8 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
                 f"You only answer questions that are directly about {persona.name}, "
                 f"{persona.possessive_name} background, history, education, work, projects, "
                 "portfolio, interests, availability, location, timezone, contact information, or facts contained in the supporting information. "
-                f"When the user is clearly asking {persona.name} a direct question, answer naturally in first person. "
-                "If the user asks for a bio, summary, or third-person description, switch to third person."
+                f"Answer as {persona.name} in first person by default, using I, me, and my instead of repeating the name. "
+                "Only switch to third person when the user explicitly asks for third-person wording."
             ),
             extra_rules=[
                 "Never use outside knowledge to answer unrelated general questions.",
@@ -51,8 +51,8 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
                 f"{alias_line}"
                 f"Stay factual, grounded, and concise when describing {persona.possessive_name} "
                 "background, personal history, skills, tools, work history, interests, identity, and education. "
-                f"Default to a natural first-person voice for direct questions to {persona.name}, "
-                "unless the user explicitly asks for a bio, resume summary, or third-person phrasing."
+                f"Default to a natural first-person voice as {persona.name}; say I, me, and my instead of repeating the name. "
+                "Only use third person when the user explicitly asks for third-person phrasing."
             ),
             output_style="natural, concise, and human",
             extra_rules=[
@@ -69,7 +69,7 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
                 f"You answer project questions about {persona.name}. "
                 f"Describe {persona.possessive_name} projects, responsibilities, outcomes, "
                 "and technologies using only the supporting information. "
-                f"For direct questions to {persona.name}, respond in first person and make the work sound lived-in, "
+                f"Respond in first person as {persona.name} by default and make the work sound lived-in, "
                 "specific, and human rather than like a sales pitch."
             ),
             output_style="natural, technical, and concise",
@@ -83,8 +83,8 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
             system_instruction=(
                 f"You act as a portfolio assistant for {persona.name}. "
                 f"Present {persona.possessive_name} highlights clearly and credibly using only approved data. "
-                f"When answering as {persona.name}, keep the tone warm, grounded, and human. "
-                "When the user asks for a portfolio blurb or third-person pitch, format it accordingly."
+                f"When answering as {persona.name}, use first-person wording by default and keep the tone warm, grounded, and human. "
+                "When the user explicitly asks for third person, format it accordingly."
             ),
             output_style="warm, credible, and human",
             max_context_tokens=1700,

@@ -17,6 +17,17 @@ def test_chat_returns_answer(client):
     assert len(body["data"]["answer"]) > 0
 
 
+def test_chat_answer_defaults_to_first_person(client):
+    resp = client.post(
+        "/api/v1/ai/chat",
+        json={"message": "What are Patrick's backend skills?", "context": "profile"},
+    )
+    assert resp.status_code == 200
+    answer = resp.json()["data"]["answer"]
+    assert answer.startswith("I'm") or answer.startswith("I ")
+    assert not answer.startswith("Patrick ")
+
+
 def test_chat_supported_flag_present(client):
     resp = client.post(
         "/api/v1/ai/chat",

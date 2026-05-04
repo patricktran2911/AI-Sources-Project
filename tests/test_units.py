@@ -9,6 +9,7 @@ import pytest
 from app.contexts.context_registry import ContextRegistry
 from app.contexts.context_router import ContextRouter, _KEYWORD_HINTS, _forced_context
 from app.contexts.knowledge_categorizer import infer_category
+from app.core.persona import normalize_first_person_answer
 from app.core.schemas import KnowledgeChunk, RerankResult, RetrievalResult
 from app.features.session_store import SessionStore
 from app.prompt.prompt_builder import PromptBuilder
@@ -145,6 +146,7 @@ class TestPromptBuilder:
         )
         system_content = result.messages[0]["content"]
         assert "Write like a real person" in system_content
+        assert "say I, me, and my" in system_content
         assert "AI representative" in system_content
         assert "generic assistant closers" in system_content
 
@@ -183,6 +185,20 @@ class TestPromptBuilder:
         )
         assert result.metrics.history_messages_trimmed > 0
         assert result.metrics.history_messages_used < len(history)
+
+    def test_normalize_first_person_answer_rewrites_self_references(self):
+        answer = normalize_first_person_answer(
+            "Patrick is a full-stack engineer. Patrick builds backend APIs and his mobile apps.",
+            "What does Patrick build?",
+        )
+        assert answer == "I'm a full-stack engineer. I build backend APIs and my mobile apps."
+
+    def test_normalize_first_person_answer_preserves_explicit_third_person(self):
+        answer = normalize_first_person_answer(
+            "Patrick is a full-stack engineer.",
+            "Write this in third person.",
+        )
+        assert answer == "Patrick is a full-stack engineer."
 
 
 class TestKnowledgeCategorizer:

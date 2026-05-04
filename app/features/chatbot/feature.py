@@ -6,7 +6,7 @@ import logging
 from collections.abc import AsyncIterator
 from typing import Any
 
-from app.core.persona import get_persona_profile
+from app.core.persona import get_persona_profile, normalize_first_person_answer
 from app.core.schemas import AIRequest, RerankResult
 from app.features.base import BaseFeature
 from app.prompt.prompt_builder import PromptBuilder
@@ -52,6 +52,7 @@ class ChatFeature(BaseFeature):
         request.options["_prompt_budget"] = build_result.metrics.as_meta()
 
         answer = await self._provider.generate(build_result.messages)
+        answer = normalize_first_person_answer(answer, request.query)
         return {
             "answer": answer,
             "supported": True,
@@ -89,5 +90,10 @@ class ChatFeature(BaseFeature):
         )
         request.options["_prompt_budget"] = build_result.metrics.as_meta()
 
+        streamed_tokens: list[str] = []
         async for token in self._provider.stream_generate(build_result.messages):
-            yield token
+            streamed_tokens.append(token)
+
+        answer = normalize_first_person_answer("".join(streamed_tokens), request.query)
+        for token in answer.split(" "):
+            yield token + " "

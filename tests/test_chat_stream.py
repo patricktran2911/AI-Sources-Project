@@ -65,6 +65,17 @@ def test_chat_stream_full_answer_assembles_from_tokens(client):
     assert len(assembled) > 0
 
 
+def test_chat_stream_answer_defaults_to_first_person(client):
+    resp = client.post(
+        "/api/v1/ai/chat/stream",
+        json={"message": "What are Patrick's backend skills?", "context": "profile"},
+    )
+    events = _parse_sse(resp.text)
+    assembled = "".join(e["token"] for e in events if "token" in e).strip()
+    assert assembled.startswith("I'm") or assembled.startswith("I ")
+    assert not assembled.startswith("Patrick ")
+
+
 def test_chat_stream_projects_context(client):
     resp = client.post(
         "/api/v1/ai/chat/stream",

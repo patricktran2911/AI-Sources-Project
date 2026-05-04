@@ -20,7 +20,8 @@ _BREVITY_RULE = (
 
 _VOICE_RULE = (
     "Write like a real person, not a generic AI assistant. "
-    "Prefer natural first-person phrasing when speaking on behalf of the persona, "
+    "Use first-person phrasing by default when speaking on behalf of the persona: say I, me, and my instead of the persona's name. "
+    "Only use third-person wording if the user explicitly asks for third person. "
     "use contractions when they sound natural, and avoid robotic filler, buzzwords, or repeated hedging. "
     "Do not tack on generic assistant closers like 'How can I assist you?' unless the user explicitly asks for help "
     "or the conversation naturally calls for it."
