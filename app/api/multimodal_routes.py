@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import base64
+import json
+import re
+from collections.abc import AsyncIterator
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
 
 from app.api.speech_routes import MEDIA_TYPES
 from app.core.config import get_settings
@@ -14,6 +18,7 @@ from app.features.chatbot.routes import run_chat_request
 from app.providers.speech_base import SpeechOptions
 
 router = APIRouter()
+_SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+")
 
 
 def _speech_options(body: ChatSpeechRequest) -> SpeechOptions:
@@ -49,6 +54,19 @@ def _audio_json(audio_bytes: bytes, response_format: str) -> dict[str, object]:
         "bytes": len(audio_bytes),
         "base64": base64.b64encode(audio_bytes).decode("ascii"),
     }
+
+
+def _split_sentences_for_speech(text: str) -> list[str]:
+    """Split answer text into sentence-sized speech jobs for faster first audio."""
+    cleaned = " ".join(text.strip().split())
+    if not cleaned:
+        return []
+
+    return [part.strip() for part in _SENTENCE_BOUNDARY.split(cleaned) if part.strip()] or [cleaned]
+
+
+def _ndjson_event(payload: dict[str, object]) -> bytes:
+    return (json.dumps(payload, ensure_ascii=False) + "\n").encode("utf-8")
 
 
 async def _answer_with_audio(
@@ -98,6 +116,65 @@ async def text_to_speech(
 ):
     """Generate chatbot text and synthesized speech in one JSON response."""
     return await _answer_with_audio(body, orchestrator, session_store, speech_provider)
+
+
+@router.post("/text-to-speech/stream")
+async def text_to_speech_stream(
+    body: ChatSpeechRequest,
+    orchestrator: OrchestratorDep,
+    session_store: SessionStoreDep,
+    speech_provider: SpeechProviderDep,
+):
+    """Generate chatbot text, then stream sentence-level speech audio as NDJSON."""
+
+    async def stream_events() -> AsyncIterator[bytes]:
+        chat_body = ChatRequest(
+            message=body.message,
+            context=body.context,
+            session_id=body.session_id,
+            user_id=body.user_id,
+        )
+        chat_response = await run_chat_request(chat_body, orchestrator, session_store)
+        answer = str(chat_response.data.get("answer", "") or "")
+        options = _speech_options(body)
+        meta = dict(chat_response.meta)
+        meta["speech"] = {
+            "provider": get_settings().speech_provider,
+            "format": body.response_format,
+            "voice": options.voice,
+            "speed": options.speed,
+            "instructions": options.instructions,
+            "streaming": "sentence",
+        }
+
+        yield _ndjson_event(
+            {
+                "type": "answer",
+                "success": chat_response.success,
+                "answer": answer,
+                "data": chat_response.data,
+                "meta": meta,
+            }
+        )
+
+        for index, sentence in enumerate(_split_sentences_for_speech(answer)):
+            audio_bytes, _ = await _collect_speech_audio(sentence, body, speech_provider)
+            yield _ndjson_event(
+                {
+                    "type": "audio",
+                    "index": index,
+                    "text": sentence,
+                    "audio": _audio_json(audio_bytes, body.response_format),
+                }
+            )
+
+        yield _ndjson_event({"type": "done"})
+
+    return StreamingResponse(
+        stream_events(),
+        media_type="application/x-ndjson",
+        headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.post("/speech-to-text")
