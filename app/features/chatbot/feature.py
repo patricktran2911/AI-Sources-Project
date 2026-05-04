@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from collections.abc import AsyncIterator
 from typing import Any
 
@@ -13,6 +14,17 @@ from app.prompt.prompt_builder import PromptBuilder
 from app.providers.base import BaseLLMProvider
 
 logger = logging.getLogger(__name__)
+_COMPLETE_SENTENCE_RE = re.compile(r"(.+?[.!?])(?:\s+|$)", re.DOTALL)
+
+
+def _pop_complete_sentences(buffer: str) -> tuple[list[str], str]:
+    """Return complete sentence chunks plus unfinished remainder."""
+    sentences: list[str] = []
+    consumed = 0
+    for match in _COMPLETE_SENTENCE_RE.finditer(buffer):
+        sentences.append(" ".join(match.group(1).split()))
+        consumed = match.end()
+    return sentences, buffer[consumed:]
 
 
 class ChatFeature(BaseFeature):
@@ -70,7 +82,7 @@ class ChatFeature(BaseFeature):
         max_context_tokens: int | None = None,
         **kwargs,
     ) -> AsyncIterator[str]:
-        """Yield answer tokens one chunk at a time for SSE streaming."""
+        """Yield normalized answer chunks as soon as each sentence is complete."""
         history: list[dict[str, str]] = request.options.get("history", [])
         refusal_message = get_persona_profile().refusal_message
 
@@ -90,10 +102,13 @@ class ChatFeature(BaseFeature):
         )
         request.options["_prompt_budget"] = build_result.metrics.as_meta()
 
-        streamed_tokens: list[str] = []
+        sentence_buffer = ""
         async for token in self._provider.stream_generate(build_result.messages):
-            streamed_tokens.append(token)
+            sentence_buffer += token
+            sentences, sentence_buffer = _pop_complete_sentences(sentence_buffer)
+            for sentence in sentences:
+                yield normalize_first_person_answer(sentence, request.query) + " "
 
-        answer = normalize_first_person_answer("".join(streamed_tokens), request.query)
-        for token in answer.split(" "):
-            yield token + " "
+        final_sentence = " ".join(sentence_buffer.split())
+        if final_sentence:
+            yield normalize_first_person_answer(final_sentence, request.query) + " "
