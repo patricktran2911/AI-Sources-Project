@@ -111,6 +111,42 @@ def test_text_to_speech_stream_returns_live_sentence_audio(client, fake_multimod
     assert [call[0] for call in speech.calls] == audio_texts
 
 
+def test_text_to_speech_stream_pairs_short_sentences(client, fake_multimodal_providers):
+    speech, _ = fake_multimodal_providers
+    original_orchestrator = client.app.state.orchestrator
+
+    class FakeShortSentenceOrchestrator:
+        def check_request(self, request):
+            return None
+
+        async def handle_stream(self, request):
+            request.options["_stream_meta"] = {"supported": True}
+            yield "Yes. "
+            yield "I can help. "
+
+    client.app.state.orchestrator = FakeShortSentenceOrchestrator()
+    try:
+        resp = client.post(
+            "/api/v1/ai/text-to-speech/stream",
+            json={
+                "message": "Can you help?",
+                "context": "profile",
+                "response_format": "mp3",
+            },
+        )
+    finally:
+        client.app.state.orchestrator = original_orchestrator
+
+    assert resp.status_code == 200
+    events = [json.loads(line) for line in resp.text.splitlines()]
+    sentence_events = [event for event in events if event["type"] == "sentence"]
+    audio_events = [event for event in events if event["type"] == "audio"]
+    assert [event["text"] for event in sentence_events] == ["Yes. I can help."]
+    assert [event["sentences"] for event in sentence_events] == [["Yes.", "I can help."]]
+    assert [event["text"] for event in audio_events] == ["Yes. I can help."]
+    assert [call[0] for call in speech.calls] == ["Yes. I can help."]
+
+
 def test_speech_to_text_returns_transcript(client, fake_multimodal_providers):
     _, transcription = fake_multimodal_providers
     resp = client.post(

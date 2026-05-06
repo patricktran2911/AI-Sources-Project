@@ -20,6 +20,8 @@ from app.providers.speech_base import SpeechOptions
 router = APIRouter()
 _SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+")
 _COMPLETE_SENTENCE_RE = re.compile(r"(.+?[.!?])(?:\s+|$)", re.DOTALL)
+_MIN_AUDIO_CHUNK_CHARS = 35
+_MAX_AUDIO_CHUNK_SENTENCES = 2
 
 
 def _speech_options(body: ChatSpeechRequest) -> SpeechOptions:
@@ -74,6 +76,11 @@ def _pop_complete_sentences(buffer: str) -> tuple[list[str], str]:
         sentences.append(" ".join(match.group(1).split()))
         consumed = match.end()
     return sentences, buffer[consumed:]
+
+
+def _should_hold_for_next_sentence(sentence: str) -> bool:
+    """Avoid tiny one-sentence audio clips that sound choppy in the UI."""
+    return len(sentence.strip()) < _MIN_AUDIO_CHUNK_CHARS
 
 
 def _ndjson_event(payload: dict[str, object]) -> bytes:
@@ -160,6 +167,11 @@ async def text_to_speech_stream(
             "speed": options.speed,
             "instructions": options.instructions,
             "streaming": "live_sentence",
+            "audio_chunking": {
+                "strategy": "single_sentence_or_pair_short_sentence",
+                "min_single_sentence_chars": _MIN_AUDIO_CHUNK_CHARS,
+                "max_sentences_per_audio": _MAX_AUDIO_CHUNK_SENTENCES,
+            },
         }
 
         yield _ndjson_event(
@@ -173,21 +185,56 @@ async def text_to_speech_stream(
 
         full_answer: list[str] = []
         sentence_buffer = ""
+        pending_audio_sentences: list[str] = []
         sentence_index = 0
         supported = True
         stream_meta: dict[str, object] = {}
 
-        async def emit_sentence(sentence: str, index: int) -> AsyncIterator[bytes]:
-            yield _ndjson_event({"type": "sentence", "index": index, "text": sentence})
-            audio_bytes, _ = await _collect_speech_audio(sentence, body, speech_provider)
+        async def emit_audio_chunk(sentences: list[str], index: int) -> AsyncIterator[bytes]:
+            chunk_text = " ".join(sentence.strip() for sentence in sentences if sentence.strip())
+            if not chunk_text:
+                return
+            yield _ndjson_event(
+                {
+                    "type": "sentence",
+                    "index": index,
+                    "text": chunk_text,
+                    "sentences": sentences,
+                }
+            )
+            audio_bytes, _ = await _collect_speech_audio(chunk_text, body, speech_provider)
             yield _ndjson_event(
                 {
                     "type": "audio",
                     "index": index,
-                    "text": sentence,
+                    "text": chunk_text,
+                    "sentences": sentences,
                     "audio": _audio_json(audio_bytes, body.response_format),
                 }
             )
+
+        async def queue_sentence_for_audio(sentence: str) -> AsyncIterator[bytes]:
+            nonlocal sentence_index, pending_audio_sentences
+
+            cleaned = " ".join(sentence.strip().split())
+            if not cleaned:
+                return
+
+            if pending_audio_sentences:
+                pending_audio_sentences.append(cleaned)
+                async for event in emit_audio_chunk(pending_audio_sentences, sentence_index):
+                    yield event
+                sentence_index += 1
+                pending_audio_sentences = []
+                return
+
+            if _should_hold_for_next_sentence(cleaned):
+                pending_audio_sentences = [cleaned]
+                return
+
+            async for event in emit_audio_chunk([cleaned], sentence_index):
+                yield event
+            sentence_index += 1
 
         try:
             async for chunk in orchestrator.handle_stream(ai_request):
@@ -200,17 +247,21 @@ async def text_to_speech_stream(
                 sentence_buffer += text + " "
                 sentences, sentence_buffer = _pop_complete_sentences(sentence_buffer)
                 for sentence in sentences:
-                    async for event in emit_sentence(sentence, sentence_index):
+                    async for event in queue_sentence_for_audio(sentence):
                         yield event
-                    sentence_index += 1
         except Exception:
             yield _ndjson_event({"type": "error", "error": "An error occurred during generation."})
             return
 
         final_sentence = " ".join(sentence_buffer.split())
         if final_sentence:
-            async for event in emit_sentence(final_sentence, sentence_index):
+            async for event in queue_sentence_for_audio(final_sentence):
                 yield event
+
+        if pending_audio_sentences:
+            async for event in emit_audio_chunk(pending_audio_sentences, sentence_index):
+                yield event
+            sentence_index += 1
 
         stream_meta = dict(ai_request.options.get("_stream_meta", {}))
         prompt_budget = ai_request.options.get("_prompt_budget")
