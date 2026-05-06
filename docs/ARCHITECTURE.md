@@ -59,7 +59,7 @@ Speech output is intentionally a second step after chat. Clients call `/chat` to
 
 For one-call voice UX, clients can call `/text-to-speech` to get the chatbot answer and base64 audio together, or `/speech-to-speech` to upload user audio, transcribe it, generate the grounded answer, and receive answer audio in the same JSON response.
 
-Self-hosted voice cloning is isolated behind `LocalSpeechProvider`, which calls the separate `Self-Host` service instead of loading heavy ML models into the main backend process. That service now prefers CosyVoice for persona-style speech and keeps F5-TTS as a fallback.
+Self-hosted voice cloning is isolated behind `LocalSpeechProvider`, which calls a separately hosted `Self-Host` service instead of loading heavy ML models into the main backend process. That service prefers CosyVoice for persona-style speech and keeps F5-TTS as a fallback.
 
 ## Data Model
 

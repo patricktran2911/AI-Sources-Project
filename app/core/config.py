@@ -70,7 +70,7 @@ class Settings(BaseSettings):
     elevenlabs_similarity_boost: float = 0.85
     elevenlabs_style: float = 0.0
     elevenlabs_use_speaker_boost: bool = True
-    local_tts_url: str = "http://127.0.0.1:7861/v1/voice/synthesize"
+    local_tts_url: str = ""
     local_tts_api_key: str = ""
     local_tts_reference_audio_path: str = ""
     local_tts_reference_text: str = ""

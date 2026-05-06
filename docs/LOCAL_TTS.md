@@ -1,96 +1,79 @@
-# Local Voice Cloning
+# Self-Host Voice Integration
 
-This project can use a self-hosted voice-cloning service behind the existing `/api/v1/ai/speech` endpoint.
+`AI Sources Project` can call an external `Self-Host` service behind the existing `/api/v1/ai/speech` and voice-chat endpoints. The cloud backend never loads CosyVoice, F5-TTS, model weights, checkpoints, or private reference audio.
 
-The recommended local engine is CosyVoice through the sibling `Self-Host` repo. F5-TTS remains available there as a fallback for local development or when the CosyVoice runtime is not running.
+The current production default is:
+
+```env
+SPEECH_PROVIDER=openai
+LOCAL_TTS_URL=
+LOCAL_TTS_API_KEY=
+```
+
+Use `SPEECH_PROVIDER=local` only after `Self-Host` is deployed somewhere reachable by this backend.
 
 ## Backend Flow
 
 ```text
 Frontend
-  -> POST /api/v1/ai/chat
-  -> POST /api/v1/ai/speech
+  -> AI Sources /api/v1/ai/chat or voice endpoint
   -> LocalSpeechProvider
-  -> Self-Host /v1/voice/synthesize
+  -> hosted Self-Host /v1/voice/synthesize
   -> CosyVoice runtime, or F5-TTS fallback
   -> audio bytes
 ```
 
-## Prepare Reference Audio
+## Voice Safety
 
-The prepared sample from the earlier recording step is:
+- Only use voice samples from the person who owns this AI and has explicitly consented to cloning their voice.
+- Record consent metadata through `POST /api/v1/ai/voice/consent` before enabling local voice output.
+- Keep actual reference audio and model artifacts on the Self-Host machine only.
+- Keep `VOICE_ALLOW_REQUEST_REFERENCE_OVERRIDE=false` in Self-Host production environments.
+- Use a strong shared secret: `LOCAL_TTS_API_KEY` in this backend must match `LOCAL_AI_API_KEY` in Self-Host.
 
-```powershell
-$env:TEMP\ai-sources-voice-samples\patrick_voice_sample.wav
-```
+## Configure AI Sources
 
-Use the exact transcript for the reference audio in the sibling `Self-Host` repo's `.env`. Better transcript quality usually means better voice cloning.
-
-Only use voice samples from the person who owns this AI and has explicitly consented to cloning their voice. Record that consent through `POST /api/v1/ai/voice/consent` before enabling local voice output for the profile. The main backend stores consent metadata only; the actual reference audio should stay on the local `Self-Host` machine.
-
-## Install Self-Host Voice Service
-
-Use the standalone PC voice-server project because its ML dependencies are heavier than the main backend:
-
-```powershell
-cd "E:\DevProj\AI Personal Projects\Self-Host"
-py -3.10 -m venv .venv
-.venv\Scripts\activate
-python -m pip install --upgrade pip
-pip install torch==2.8.0+cu128 torchaudio==2.8.0+cu128 --extra-index-url https://download.pytorch.org/whl/cu128
-pip install -r requirements.txt
-```
-
-For NVIDIA GPU, install the PyTorch build that matches your CUDA version before installing voice dependencies.
-
-For the better personal chatbot voice, run the official CosyVoice FastAPI runtime beside the `Self-Host` app:
-
-```powershell
-cd "E:\DevProj\AI Personal Projects\CosyVoice"
-conda activate cosyvoice
-python runtime\python\fastapi\server.py --port 50000 --model_dir pretrained_models\Fun-CosyVoice3-0.5B
-```
-
-Keep `VOICE_ENGINE=auto` in `Self-Host\.env` while testing. It prefers CosyVoice and falls back to F5-TTS if port `50000` is not available.
-
-## Configure Main Backend
-
-Set these values in `.env`:
+Set these values only after the external voice host is ready:
 
 ```env
 SPEECH_PROVIDER=local
-LOCAL_TTS_URL=http://127.0.0.1:7861/v1/voice/synthesize
+LOCAL_TTS_URL=https://self-host.example.com/v1/voice/synthesize
 LOCAL_TTS_API_KEY=the-same-value-as-LOCAL_AI_API_KEY
 LOCAL_TTS_REFERENCE_AUDIO_PATH=
 LOCAL_TTS_REFERENCE_TEXT=
 LOCAL_TTS_MODEL=
 ```
 
-When using the standalone `Self-Host` project, reference audio, reference text, engine, and model are configured inside that project. This backend only needs the server URL and API key.
+When using the standalone `Self-Host` project, reference audio, reference text, engine, and model selection are configured inside that project. This backend only needs the service URL and API key.
 
-## Start The Local TTS Server
+## Verify The Integration
 
-In the standalone `Self-Host` project:
+Check Self-Host directly:
 
-```powershell
-cd "E:\DevProj\AI Personal Projects\Self-Host"
-.\run.ps1
+```bash
+curl -s https://self-host.example.com/health
+curl -s -H "Authorization: Bearer $LOCAL_TTS_API_KEY" https://self-host.example.com/v1/capabilities
 ```
 
-Then run the main backend normally:
+Check through this backend:
 
-```powershell
-uvicorn main:app --reload
+```bash
+curl -s -H "Authorization: Bearer $APP_API_KEY" http://127.0.0.1:8000/api/v1/ai/voice/local-health
 ```
 
-Open:
+Then test speech:
 
-```text
-http://localhost:8000/voice-test
+```bash
+curl -s -H "Authorization: Bearer $APP_API_KEY" \
+  -H "Content-Type: application/json" \
+  -X POST http://127.0.0.1:8000/api/v1/ai/speech \
+  -d '{"text":"Self-Host integration test.","response_format":"mp3"}' \
+  --output voice-test.mp3
 ```
 
-## Notes
+## Development Notes
 
 - First generation can be slow because models need to download and warm up.
-- CPU can work but will be slow. A CUDA-capable NVIDIA GPU is the practical production path.
-- Keep your ElevenLabs provider configured as a fallback until the local voice is fast and stable enough.
+- CPU can work but will be slow; a CUDA-capable NVIDIA GPU is the practical production path for cloned voice.
+- Keep OpenAI speech configured as the default fallback until the hosted Self-Host service is reliable.
+- Do not commit `.env`, private voice samples, generated audio, model weights, or checkpoints.

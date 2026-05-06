@@ -112,9 +112,9 @@ Useful local URLs:
 | `ELEVENLABS_API_KEY` | ElevenLabs API key when using `SPEECH_PROVIDER=elevenlabs` |
 | `ELEVENLABS_VOICE_ID` | ElevenLabs cloned voice ID |
 | `ELEVENLABS_MODEL` | ElevenLabs speech model |
-| `LOCAL_TTS_URL` | Local self-hosted TTS server URL when using `SPEECH_PROVIDER=local` |
-| `LOCAL_TTS_REFERENCE_AUDIO_PATH` | Reference voice sample path for local voice cloning |
-| `LOCAL_TTS_REFERENCE_TEXT` | Transcript of the reference voice sample |
+| `LOCAL_TTS_URL` | External Self-Host speech URL when using `SPEECH_PROVIDER=local`; leave empty for OpenAI speech |
+| `LOCAL_TTS_REFERENCE_AUDIO_PATH` | Optional compatibility field; prefer configuring reference audio inside Self-Host |
+| `LOCAL_TTS_REFERENCE_TEXT` | Optional compatibility field; prefer configuring reference transcript inside Self-Host |
 | `LOCAL_TTS_MODEL` | Optional local model override; leave empty so Self-Host chooses CosyVoice/F5 |
 | `MAX_SPEECH_INPUT_CHARS` | Max text size accepted by `/speech` |
 | `TRANSCRIPTION_PROVIDER` | Speech-to-text provider, currently `openai` |
@@ -149,11 +149,12 @@ Current coverage focus:
 ## Team Docs
 
 - `docs/ARCHITECTURE.md`
+- `docs/DEVELOPMENT.md`
 - `docs/LOCAL_TTS.md`
 - `docs/TEAM_GUIDE.md`
 - `docs/OPERATIONS.md`
 
-Local GPU-only services live in the sibling `E:\DevProj\AI Personal Projects\Self-Host` repo and are not deployed with this backend.
+Heavy voice services live in the separate `Self-Host` repo and are not deployed with this backend. Connect to them later through a hosted service URL, not a hard-coded personal machine.
 
 ## Deployment
 

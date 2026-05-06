@@ -12,7 +12,7 @@ from app.providers.speech_base import SpeechOptions
 
 def _settings():
     return SimpleNamespace(
-        local_tts_url="http://127.0.0.1:7861/v1/voice/synthesize",
+        local_tts_url="https://self-host.example.com/v1/voice/synthesize",
         local_tts_api_key="local-secret",
         local_tts_reference_audio_path="C:/voice/ref.wav",
         local_tts_reference_text="This is the reference transcript.",
@@ -71,7 +71,7 @@ async def test_local_speech_provider_posts_reference_voice_payload(monkeypatch):
     assert b"".join(chunks) == b"audio-bytes"
     assert captured["timeout"] == 30.0
     assert captured["method"] == "POST"
-    assert captured["url"] == "http://127.0.0.1:7861/v1/voice/synthesize"
+    assert captured["url"] == "https://self-host.example.com/v1/voice/synthesize"
     assert captured["headers"]["Authorization"] == "Bearer local-secret"
     assert captured["json"] == {
         "text": "Say this locally.",

@@ -35,8 +35,8 @@ services:
       AWS_SECRET_NAME: ""
       RDS_IAM_AUTH: "false"
       DATABASE_URL: postgresql://${POSTGRES_USER:-aiuser}:${POSTGRES_PASSWORD}@127.0.0.1:${POSTGRES_PORT:-5433}/${POSTGRES_DB:-ai_sources}
-      SPEECH_PROVIDER: ${SPEECH_PROVIDER:-local}
-      LOCAL_TTS_URL: ${LOCAL_TTS_URL:-http://127.0.0.1:17861/v1/voice/synthesize}
+      SPEECH_PROVIDER: ${SPEECH_PROVIDER:-openai}
+      LOCAL_TTS_URL: ${LOCAL_TTS_URL:-}
     command: ["python", "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"]
     healthcheck:
       test:

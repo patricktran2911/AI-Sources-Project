@@ -1,10 +1,13 @@
 # Hetzner Docker Deployment
 
-This is the low-cost production layout:
+This is the lightweight production layout for the cloud backend:
 
-- Hetzner runs the public FastAPI/RAG backend and Postgres in Docker.
-- The RTX 4070 PC runs `Self-Host` for CosyVoice/F5-TTS.
-- A reverse SSH tunnel exposes the PC voice service to Hetzner at `127.0.0.1:17861`.
+- Hetzner runs the public FastAPI/RAG backend.
+- Postgres runs either on the same host or in a managed database.
+- Speech output uses OpenAI by default.
+- A future `Self-Host` voice service can be enabled later by setting an external HTTPS URL and matching API key.
+
+No personal-machine bridge or Windows startup task is part of this deployment.
 
 ## Server Setup
 
@@ -30,11 +33,11 @@ POSTGRES_PORT=5433
 DEBUG=false
 AWS_SECRET_NAME=
 RDS_IAM_AUTH=false
-OPENAI_API_KEY=replace-if-using-openai
 LLM_PROVIDER=openai
-SPEECH_PROVIDER=local
-LOCAL_TTS_URL=http://127.0.0.1:17861/v1/voice/synthesize
-LOCAL_TTS_API_KEY=replace-with-the-same-value-as-local-ai-api-key
+OPENAI_API_KEY=replace-if-using-openai
+SPEECH_PROVIDER=openai
+LOCAL_TTS_URL=
+LOCAL_TTS_API_KEY=
 ```
 
 Start or update:
@@ -46,7 +49,7 @@ docker compose -f deploy/docker-compose.app.yml logs --tail=100 app
 curl -s http://127.0.0.1:8000/api/v1/health
 ```
 
-The app-only compose file is intended for the current Hetzner host, where Postgres already runs separately on `127.0.0.1:5433`. The app container uses host networking so it can reach both Postgres and the reverse SSH voice tunnel at `127.0.0.1:17861`. Uvicorn is bound to `127.0.0.1:8000`; keep Nginx/Caddy in front of it for HTTPS.
+The app-only compose file is intended for the current Hetzner host, where Postgres already runs separately on `127.0.0.1:5433`. The app container uses host networking so it can reach that local database. Uvicorn is bound to `127.0.0.1:8000`; keep Nginx/Caddy in front of it for HTTPS.
 
 Use `deploy/docker-compose.prod.yml` only for a fresh all-in-one host where this stack should create its own Postgres volume.
 
@@ -59,25 +62,21 @@ sudo systemctl restart ai-sources-docker
 curl -s http://127.0.0.1:8000/api/v1/health
 ```
 
-## Reverse SSH Voice Tunnel
+## Future Self-Host Voice
 
-On the RTX 4070 PC, start `Self-Host` on `127.0.0.1:7861`, then start the tunnel:
+When `Self-Host` is deployed somewhere reachable by Hetzner, configure:
 
-```powershell
-cd "E:\DevProj\AI Personal Projects\Self-Host"
-$env:HETZNER_TUNNEL_HOST="patrick@5.78.76.197"
-.\start_hetzner_tunnel.ps1
+```env
+SPEECH_PROVIDER=local
+LOCAL_TTS_URL=https://self-host.example.com/v1/voice/synthesize
+LOCAL_TTS_API_KEY=the-same-value-as-LOCAL_AI_API_KEY
 ```
 
-Register it as a Windows scheduled task after the SSH login works:
-
-```powershell
-.\register_tunnel_task.ps1
-```
-
-On Hetzner, verify:
+Verify before enabling traffic:
 
 ```bash
-curl -s http://127.0.0.1:17861/v1/capabilities
+curl -s https://self-host.example.com/health
 curl -s -H "Authorization: Bearer $APP_API_KEY" http://127.0.0.1:8000/api/v1/ai/voice/local-health
 ```
+
+Keep `SPEECH_PROVIDER=openai` until the hosted Self-Host service is stable, secured, and reachable from the cloud backend.

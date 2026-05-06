@@ -48,6 +48,6 @@ def test_unknown_voice_profile_returns_404(client):
 
 def test_capabilities_url_targets_self_host_capabilities():
     assert (
-        _capabilities_url("http://127.0.0.1:7861/v1/voice/synthesize")
-        == "http://127.0.0.1:7861/v1/capabilities"
+        _capabilities_url("https://self-host.example.com/v1/voice/synthesize")
+        == "https://self-host.example.com/v1/capabilities"
     )

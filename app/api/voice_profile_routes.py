@@ -82,14 +82,16 @@ async def local_voice_health() -> dict[str, object]:
     settings = get_settings()
     if settings.speech_provider.lower() != "local":
         return {"success": True, "enabled": False, "provider": settings.speech_provider}
+    if not settings.local_tts_url:
+        raise HTTPException(status_code=503, detail="LOCAL_TTS_URL is not configured.")
 
     capabilities_url = _capabilities_url(settings.local_tts_url)
     headers = {}
     if settings.local_tts_api_key:
         headers["Authorization"] = f"Bearer {settings.local_tts_api_key}"
 
-    # Self-Host can be slow to answer while CosyVoice is synthesizing; a short timeout
-    # produced false 503s even though the tunnel and service were healthy.
+    # Self-Host can be slow to answer while CosyVoice is warming up; a short timeout
+    # produces false 503s even though the service is reachable.
     timeout = httpx.Timeout(connect=10.0, read=35.0, write=15.0, pool=10.0)
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:

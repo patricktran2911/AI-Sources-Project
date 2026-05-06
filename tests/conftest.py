@@ -251,7 +251,7 @@ def app():
 def client(app):
     """Synchronous TestClient with the real lifespan but a fake LLM provider."""
     fake = FakeLLMProvider()
-    with patch("app.providers.factory.get_provider", return_value=fake):
+    with patch("app.providers.factory.get_provider", return_value=fake), patch("main.get_provider", return_value=fake):
         with TestClient(app, raise_server_exceptions=True) as c:
             yield c
 
@@ -260,7 +260,7 @@ def client(app):
 async def async_client(app):
     """Async httpx client for streaming tests."""
     fake = FakeLLMProvider()
-    with patch("app.providers.factory.get_provider", return_value=fake):
+    with patch("app.providers.factory.get_provider", return_value=fake), patch("main.get_provider", return_value=fake):
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test"
         ) as ac:

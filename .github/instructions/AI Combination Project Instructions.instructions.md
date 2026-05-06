@@ -342,7 +342,7 @@ Example:
 | IP | `<<private>>` |
 | OS | Ubuntu 24.04 LTS |
 | Domain | `<<private>>` |
-| DNS | AWS Route 53 — Hosted Zone `Z09273321V4JZMOL08GT3` |
+| DNS | Managed outside this repo; keep hosted-zone IDs in secure notes, not project docs |
 | HTTPS | Let's Encrypt via Certbot (auto-renews, expires 2026-06-24) |
 
 ### SSH Access

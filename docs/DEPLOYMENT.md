@@ -1,9 +1,6 @@
 # Deployment Runbook
 
-This project deploys as two services:
-
-- `AI Sources Project`: public FastAPI chatbot/RAG backend.
-- `Self-Host`: private GPU voice service that keeps consented reference audio on the owner's PC.
+This project deploys as the public FastAPI chatbot/RAG backend. Heavy voice synthesis is optional and lives outside this repo in the separate `Self-Host` service.
 
 ## Required Secrets
 
@@ -14,17 +11,15 @@ APP_API_KEY=change-this-before-deploying
 CORS_ALLOW_ORIGINS=https://your-chat-ui.example.com
 DATABASE_URL=postgresql://...
 OPENAI_API_KEY=...
-LOCAL_TTS_API_KEY=the-same-value-as-LOCAL_AI_API_KEY
+SPEECH_PROVIDER=openai
 ```
 
-Set these on the local GPU PC:
+Only set the local speech values after a hosted Self-Host service exists:
 
 ```env
-LOCAL_AI_API_KEY=the-same-value-as-LOCAL_TTS_API_KEY
-VOICE_REFERENCE_AUDIO_PATH=C:\path\to\approved\voice-samples\patrick.wav
-VOICE_REFERENCE_DIR=C:\path\to\approved\voice-samples
-VOICE_REFERENCE_TEXT=The exact transcript spoken in the reference clip.
-VOICE_ALLOW_REQUEST_REFERENCE_OVERRIDE=false
+SPEECH_PROVIDER=local
+LOCAL_TTS_URL=https://self-host.example.com/v1/voice/synthesize
+LOCAL_TTS_API_KEY=the-same-value-as-LOCAL_AI_API_KEY
 ```
 
 ## Main Backend
@@ -38,32 +33,52 @@ py -3.12 -m uvicorn main:app --host 0.0.0.0 --port 8000
 
 For container hosting, build from `Dockerfile` and provide the same environment variables through the platform's secret manager.
 
-## Local Voice Service
+## Hetzner
 
-```powershell
-cd "E:\DevProj\AI Personal Projects\Self-Host"
-py -3.10 -m venv .venv
-.\.venv\Scripts\activate
-python -m pip install --upgrade pip
-pip install torch==2.8.0+cu128 torchaudio==2.8.0+cu128 --extra-index-url https://download.pytorch.org/whl/cu128
-pip install -r requirements.txt
-.\run.ps1
+The current Hetzner deployment should continue to use:
+
+```env
+SPEECH_PROVIDER=openai
+LOCAL_TTS_URL=
+LOCAL_TTS_API_KEY=
 ```
 
-Run CosyVoice beside it if `VOICE_ENGINE=auto` or `VOICE_ENGINE=cosyvoice`:
+Deploy or restart with the systemd/Docker flow in `deploy/README.md`, then verify:
 
-```powershell
-cd "E:\DevProj\AI Personal Projects\CosyVoice"
-conda activate cosyvoice
-python runtime\python\fastapi\server.py --port 50000 --model_dir pretrained_models\Fun-CosyVoice3-0.5B
+```bash
+curl -s http://127.0.0.1:8000/api/v1/health
+curl -s https://ai-dev.patrickcs-web.com/api/v1/health
 ```
 
-Expose `Self-Host` only through a private tunnel or HTTPS tunnel, and keep `LOCAL_AI_API_KEY` set.
+## Future Self-Host Voice
+
+Deploy `Self-Host` on a dedicated machine or cloud GPU host. Do not point Hetzner at a personal Windows workstation unless that is intentionally reintroduced later.
+
+Required Self-Host values:
+
+```env
+LOCAL_AI_API_KEY=the-same-value-as-LOCAL_TTS_API_KEY
+VOICE_REFERENCE_AUDIO_PATH=/srv/self-host/voice/reference/patrick.wav
+VOICE_REFERENCE_DIR=/srv/self-host/voice/reference
+VOICE_REFERENCE_TEXT=The exact transcript spoken in the reference clip.
+VOICE_ALLOW_REQUEST_REFERENCE_OVERRIDE=false
+```
+
+Before switching this backend to `SPEECH_PROVIDER=local`, verify:
+
+```bash
+curl -s https://self-host.example.com/health
+curl -s -H "Authorization: Bearer $LOCAL_TTS_API_KEY" https://self-host.example.com/v1/capabilities
+```
+
+Then set `LOCAL_TTS_URL`, set the matching API key, restart the backend, and call `/api/v1/ai/voice/local-health`.
 
 ## Smoke Checks
 
 ```powershell
 curl http://localhost:8000/api/v1/health
+curl -H "Authorization: Bearer %APP_API_KEY%" http://localhost:8000/api/v1/ai/features
 curl -H "Authorization: Bearer %APP_API_KEY%" http://localhost:8000/api/v1/ai/voice/local-health
-curl -H "Authorization: Bearer %LOCAL_AI_API_KEY%" http://localhost:7861/v1/capabilities
 ```
+
+When `SPEECH_PROVIDER=openai`, `local-health` should report local voice as disabled.
