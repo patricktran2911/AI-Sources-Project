@@ -193,6 +193,13 @@ class TestPromptBuilder:
         )
         assert answer == "I'm a full-stack engineer. I build backend APIs and my mobile apps."
 
+    def test_normalize_first_person_answer_uses_me_after_preposition(self):
+        answer = normalize_first_person_answer(
+            "I can only help with questions about Patrick. Try asking about Patrick's background.",
+            "What is the weather?",
+        )
+        assert answer == "I can only help with questions about me. Try asking about my background."
+
     def test_normalize_first_person_answer_preserves_explicit_third_person(self):
         answer = normalize_first_person_answer(
             "Patrick is a full-stack engineer.",

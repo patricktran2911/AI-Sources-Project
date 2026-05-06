@@ -86,9 +86,8 @@ def get_persona_profile() -> PersonaProfile:
     )
     possessive_name = _possessive(settings.persona_name)
     refusal_message = (
-        f"I'm {possessive_name} personal AI assistant and can only help with questions "
-        f"about {settings.persona_name}. Try asking about {possessive_name} background, "
-        "history, work, projects, interests, or experience."
+        "I'm your personal AI assistant and can only help with questions about me. "
+        "Try asking about my background, history, work, projects, interests, or experience."
     )
     scope_summary = (
         f"You represent {settings.persona_name} and must stay grounded in approved "
@@ -127,8 +126,15 @@ def normalize_first_person_answer(answer: str, query: str) -> str:
     name_pattern = "|".join(re.escape(name) for name in names)
 
     normalized = re.sub(
-        rf"\b(?:{name_pattern})['’]s\b",
+        rf"\b(?:{name_pattern})(?:'|\u2019)s\b",
         "my",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+
+    normalized = re.sub(
+        rf"\b(?P<prep>about|for|to|with|from)\s+(?:{name_pattern})\b",
+        lambda match: f"{match.group('prep')} me",
         normalized,
         flags=re.IGNORECASE,
     )
