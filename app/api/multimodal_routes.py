@@ -20,7 +20,7 @@ from app.providers.speech_base import SpeechOptions
 router = APIRouter()
 _SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+")
 _COMPLETE_SENTENCE_RE = re.compile(r"(.+?[.!?])(?:\s+|$)", re.DOTALL)
-_MIN_AUDIO_CHUNK_CHARS = 35
+_MIN_AUDIO_CHUNK_WORDS = 10
 _MAX_AUDIO_CHUNK_SENTENCES = 2
 
 
@@ -80,7 +80,7 @@ def _pop_complete_sentences(buffer: str) -> tuple[list[str], str]:
 
 def _should_hold_for_next_sentence(sentence: str) -> bool:
     """Avoid tiny one-sentence audio clips that sound choppy in the UI."""
-    return len(sentence.strip()) < _MIN_AUDIO_CHUNK_CHARS
+    return len(sentence.strip().split()) < _MIN_AUDIO_CHUNK_WORDS
 
 
 def _ndjson_event(payload: dict[str, object]) -> bytes:
@@ -169,7 +169,7 @@ async def text_to_speech_stream(
             "streaming": "live_sentence",
             "audio_chunking": {
                 "strategy": "single_sentence_or_pair_short_sentence",
-                "min_single_sentence_chars": _MIN_AUDIO_CHUNK_CHARS,
+                "min_single_sentence_words": _MIN_AUDIO_CHUNK_WORDS,
                 "max_sentences_per_audio": _MAX_AUDIO_CHUNK_SENTENCES,
             },
         }

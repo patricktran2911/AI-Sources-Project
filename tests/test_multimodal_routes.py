@@ -93,6 +93,7 @@ def test_text_to_speech_stream_returns_live_sentence_audio(client, fake_multimod
 
     events = [json.loads(line) for line in resp.text.splitlines()]
     assert events[0]["type"] == "meta"
+    assert events[0]["speech"]["audio_chunking"]["min_single_sentence_words"] == 10
     answer_deltas = [event["text"] for event in events if event["type"] == "answer_delta"]
     sentence_texts = [event["text"] for event in events if event["type"] == "sentence"]
     audio_texts = [event["text"] for event in events if event["type"] == "audio"]
@@ -145,6 +146,46 @@ def test_text_to_speech_stream_pairs_short_sentences(client, fake_multimodal_pro
     assert [event["sentences"] for event in sentence_events] == [["Yes.", "I can help."]]
     assert [event["text"] for event in audio_events] == ["Yes. I can help."]
     assert [call[0] for call in speech.calls] == ["Yes. I can help."]
+
+
+def test_text_to_speech_stream_uses_word_threshold_for_short_sentences(client, fake_multimodal_providers):
+    speech, _ = fake_multimodal_providers
+    original_orchestrator = client.app.state.orchestrator
+
+    class FakeWordThresholdOrchestrator:
+        def check_request(self, request):
+            return None
+
+        async def handle_stream(self, request):
+            request.options["_stream_meta"] = {"supported": True}
+            yield "One two three four five six seven eight nine. "
+            yield "This sentence should join it. "
+
+    client.app.state.orchestrator = FakeWordThresholdOrchestrator()
+    try:
+        resp = client.post(
+            "/api/v1/ai/text-to-speech/stream",
+            json={
+                "message": "Test short sentence pairing.",
+                "context": "profile",
+                "response_format": "mp3",
+            },
+        )
+    finally:
+        client.app.state.orchestrator = original_orchestrator
+
+    assert resp.status_code == 200
+    events = [json.loads(line) for line in resp.text.splitlines()]
+    sentence_events = [event for event in events if event["type"] == "sentence"]
+    assert [event["sentences"] for event in sentence_events] == [
+        [
+            "One two three four five six seven eight nine.",
+            "This sentence should join it.",
+        ]
+    ]
+    assert [call[0] for call in speech.calls] == [
+        "One two three four five six seven eight nine. This sentence should join it."
+    ]
 
 
 def test_speech_to_text_returns_transcript(client, fake_multimodal_providers):
