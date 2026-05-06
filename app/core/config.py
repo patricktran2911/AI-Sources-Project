@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     app_name: str = "Personal AI Representative"
     app_version: str = "0.2.0"
     debug: bool = False
+    app_api_key: str = ""
+    cors_allow_origins: str = "http://localhost:8000,http://127.0.0.1:8000"
 
     # --- Server ---
     host: str = "0.0.0.0"
@@ -56,8 +58,8 @@ class Settings(BaseSettings):
     openai_tts_voice: str = "alloy"
     openai_tts_voice_id: str = ""
     openai_tts_instructions: str = (
-        "Speak English slowly and clearly with a natural Vietnamese accent, "
-        "like a Vietnamese speaker speaking English. Keep it warm, calm, and easy to understand."
+        "Speak in natural, warm conversational English at a lightly brisk pace. "
+        "Use a clear standard American English accent and pronounce every word cleanly."
     )
     openai_tts_response_format: str = "mp3"
     elevenlabs_api_key: str = ""
@@ -74,10 +76,10 @@ class Settings(BaseSettings):
     local_tts_reference_text: str = ""
     local_tts_model: str = ""
     local_tts_timeout_seconds: float = 300.0
-    speech_default_speed: float | None = 0.7
+    speech_default_speed: float | None = 0.92
     speech_default_instructions: str = (
-        "Speak English slowly and clearly with a natural Vietnamese accent, "
-        "like a Vietnamese speaker speaking English. Keep it warm, calm, and easy to understand."
+        "Speak in natural, warm conversational English at a lightly brisk pace. "
+        "Use a clear standard American English accent and pronounce every word cleanly."
     )
     speech_punctuation_pauses_enabled: bool = True
     speech_chunk_size: int = 4096
@@ -90,6 +92,7 @@ class Settings(BaseSettings):
     # --- Rate Limiting ---
     rate_limit_max_requests: int = 20
     rate_limit_window_seconds: int = 60
+    allow_global_knowledge_writes: bool = False
 
     # --- Chat sessions ---
     session_max_turns: int = 4
