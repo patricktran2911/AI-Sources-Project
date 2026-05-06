@@ -215,3 +215,61 @@ class FeedbackResponse(BaseModel):
 
     success: bool = True
     message: str = "Feedback recorded"
+
+
+class VoiceConsentRequest(BaseModel):
+    """Consent metadata for using the owner's voice as a synthesis reference."""
+
+    user_id: str = Field(..., min_length=1, max_length=128)
+    consent_accepted: bool = Field(..., description="Must be true before voice cloning can be enabled")
+    consent_statement: str = Field(..., min_length=20, max_length=1000)
+    reference_text: str = Field(..., min_length=20, max_length=1000)
+    reference_audio_label: str | None = Field(
+        None,
+        max_length=256,
+        description="Operator-facing label for the local reference file; not a filesystem path.",
+    )
+    language: str = Field("en", min_length=2, max_length=32)
+
+    @field_validator("consent_accepted")
+    @classmethod
+    def validate_consent_accepted(cls, value: bool) -> bool:
+        if not value:
+            raise ValueError("Voice cloning requires explicit consent.")
+        return value
+
+    @field_validator("consent_statement")
+    @classmethod
+    def validate_consent_statement(cls, value: str) -> str:
+        cleaned = " ".join(value.strip().split())
+        lowered = cleaned.lower()
+        if "consent" not in lowered or "voice" not in lowered:
+            raise ValueError("Consent statement must explicitly mention consent and voice.")
+        return cleaned
+
+    @field_validator("reference_text")
+    @classmethod
+    def validate_reference_text(cls, value: str) -> str:
+        return " ".join(value.strip().split())
+
+
+class VoiceConsentResponse(BaseModel):
+    """Response returned after recording consent metadata."""
+
+    success: bool = True
+    user_id: str
+    status: str = "consented"
+    reference_text: str
+    reference_audio_label: str | None = None
+    language: str
+
+
+class VoiceProfileResponse(BaseModel):
+    """Voice profile metadata safe to expose to authenticated clients."""
+
+    success: bool = True
+    user_id: str
+    status: str
+    reference_text: str | None = None
+    reference_audio_label: str | None = None
+    language: str | None = None

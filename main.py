@@ -35,6 +35,12 @@ from app.validation.relevance_validator import RelevanceValidator
 logger = logging.getLogger(__name__)
 
 
+def _parse_cors_origins(raw: str) -> list[str]:
+    """Parse comma-separated CORS origins from settings."""
+    origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return origins or ["http://localhost:8000", "http://127.0.0.1:8000"]
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialise heavy components once at startup."""
@@ -102,7 +108,7 @@ def create_app() -> FastAPI:
     # CORS
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=_parse_cors_origins(settings.cors_allow_origins),
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

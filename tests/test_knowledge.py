@@ -89,16 +89,13 @@ def test_add_too_short_text_returns_422(client):
     assert resp.status_code == 422
 
 
-def test_add_without_user_id_stores_as_global(client):
-    """Omitting user_id should succeed — stored as global knowledge (user_id=NULL)."""
+def test_add_without_user_id_rejects_global_write(client):
+    """Omitting user_id is rejected unless global writes are explicitly enabled."""
     resp = client.post(
         "/api/v1/ai/knowledge/add",
         json={"text": "Some meaningful knowledge text here."},
     )
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["success"] is True
-    assert data["chunks_added"] >= 1
+    assert resp.status_code == 403
 
 
 # ── GET /knowledge/{user_id} ──────────────────────────────────────────────────

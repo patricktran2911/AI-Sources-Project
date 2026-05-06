@@ -26,6 +26,8 @@ $env:TEMP\ai-sources-voice-samples\patrick_voice_sample.wav
 
 Use the exact transcript for the reference audio in the sibling `Self-Host` repo's `.env`. Better transcript quality usually means better voice cloning.
 
+Only use voice samples from the person who owns this AI and has explicitly consented to cloning their voice. Record that consent through `POST /api/v1/ai/voice/consent` before enabling local voice output for the profile. The main backend stores consent metadata only; the actual reference audio should stay on the local `Self-Host` machine.
+
 ## Install Self-Host Voice Service
 
 Use the standalone PC voice-server project because its ML dependencies are heavier than the main backend:

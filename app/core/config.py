@@ -76,7 +76,7 @@ class Settings(BaseSettings):
     local_tts_reference_text: str = ""
     local_tts_model: str = ""
     local_tts_timeout_seconds: float = 300.0
-    speech_default_speed: float | None = 0.92
+    speech_default_speed: float | None = 1
     speech_default_instructions: str = (
         "Speak in natural, warm conversational English at a lightly brisk pace. "
         "Use a clear standard American English accent and pronounce every word cleanly."

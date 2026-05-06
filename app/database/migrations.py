@@ -87,6 +87,27 @@ CREATE INDEX IF NOT EXISTS idx_feedback_created
     ON feedback (created_at);
 """
 
+# ── Voice consent/profile metadata ───────────────────────────────────
+
+_CREATE_VOICE_PROFILES = """
+CREATE TABLE IF NOT EXISTS voice_profiles (
+    pk                      BIGSERIAL PRIMARY KEY,
+    user_id                 TEXT        NOT NULL UNIQUE,
+    status                  TEXT        NOT NULL,
+    consent_statement       TEXT        NOT NULL,
+    reference_text          TEXT        NOT NULL,
+    reference_audio_label   TEXT,
+    language                TEXT        NOT NULL DEFAULT 'en',
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
+_IDX_VOICE_PROFILES_STATUS = """
+CREATE INDEX IF NOT EXISTS idx_voice_profiles_status
+    ON voice_profiles (status);
+"""
+
 _INSERT = """
 INSERT INTO knowledge_chunks (id, context, text, category, metadata, user_id)
 VALUES ($1, $2, $3, $4, $5, $6)
@@ -105,6 +126,8 @@ async def run_migrations(pool: asyncpg.Pool) -> None:
         await conn.execute(_IDX_SESSION)
         await conn.execute(_CREATE_FEEDBACK)
         await conn.execute(_IDX_FEEDBACK)
+        await conn.execute(_CREATE_VOICE_PROFILES)
+        await conn.execute(_IDX_VOICE_PROFILES_STATUS)
     logger.info("Database migrations applied")
 
 

@@ -34,9 +34,11 @@ class LocalSpeechProvider(BaseSpeechProvider):
         payload: dict[str, object] = {
             "text": text,
             "response_format": options.response_format,
-            "reference_audio_path": self._reference_audio_path,
-            "reference_text": self._reference_text,
         }
+        if self._reference_audio_path:
+            payload["reference_audio_path"] = self._reference_audio_path
+        if self._reference_text:
+            payload["reference_text"] = self._reference_text
         if self._model:
             payload["model"] = self._model
         if options.voice:

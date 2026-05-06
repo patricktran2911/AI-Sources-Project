@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ai_sources}
+      POSTGRES_USER: ${POSTGRES_USER:-aiuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - ai_sources_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aiuser} -d ${POSTGRES_DB:-ai_sources}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    environment:
+      HOST: 127.0.0.1
+      PORT: 8000
+      DEBUG: "false"
+      AWS_SECRET_NAME: ""
+      RDS_IAM_AUTH: "false"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-aiuser}:${POSTGRES_PASSWORD}@127.0.0.1:${POSTGRES_PORT:-5433}/${POSTGRES_DB:-ai_sources}
+      SPEECH_PROVIDER: ${SPEECH_PROVIDER:-local}
+      LOCAL_TTS_URL: ${LOCAL_TTS_URL:-http://127.0.0.1:17861/v1/voice/synthesize}
+    command: ["python", "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5).read()",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  ai_sources_pgdata:

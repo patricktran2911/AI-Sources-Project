@@ -54,6 +54,7 @@ _install_st_stubs()
 # In-memory store shared across all FakePool instances in a test session.
 _DB_STORE: list[dict] = []
 _DB_PK = [0]
+_VOICE_PROFILE_STORE: dict[str, dict] = {}
 
 
 def _install_asyncpg_stub():
@@ -86,6 +87,10 @@ def _install_asyncpg_stub():
                 ctx, uid = args[0], args[1]
                 return [dict(r) for r in _DB_STORE
                         if r["context"] == ctx and (r["user_id"] is None or r["user_id"] == uid)]
+
+            if "FROM VOICE_PROFILES" in q and "WHERE USER_ID = $1" in q:
+                row = _VOICE_PROFILE_STORE.get(args[0])
+                return [dict(row)] if row else []
 
             # get_all_user_chunks / _list_with_context: WHERE user_id=$1
             if "WHERE USER_ID = $1" in q:
@@ -121,6 +126,15 @@ def _install_asyncpg_stub():
                 ctx, uid = args[0], args[1]
                 _DB_STORE[:] = [r for r in _DB_STORE
                                 if not (r["context"] == ctx and r["user_id"] == uid)]
+            elif "INSERT INTO VOICE_PROFILES" in q:
+                _VOICE_PROFILE_STORE[args[0]] = {
+                    "user_id": args[0],
+                    "status": "consented",
+                    "consent_statement": args[1],
+                    "reference_text": args[2],
+                    "reference_audio_label": args[3],
+                    "language": args[4],
+                }
 
         async def executemany(self, query, rows, **kw):
             for row in rows:
@@ -136,6 +150,9 @@ def _install_asyncpg_stub():
                         _DB_STORE.pop(i)
                         return {"id": chunk_id}
                 return None
+            if "FROM VOICE_PROFILES" in q and "WHERE USER_ID = $1" in q:
+                row = _VOICE_PROFILE_STORE.get(args[0])
+                return dict(row) if row else None
             return None
 
         # ── fetchval (SELECT 1 probe) ─────────────────────────────────

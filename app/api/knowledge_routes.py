@@ -9,6 +9,7 @@ import uuid
 from fastapi import APIRouter, HTTPException
 
 from app.contexts.knowledge_categorizer import infer_category
+from app.core.config import get_settings
 from app.core.dependencies import KnowledgeRepoDep, OrchestratorDep
 from app.core.schemas import (
     KnowledgeAddRequest,
@@ -59,6 +60,9 @@ async def add_knowledge(
     orchestrator: OrchestratorDep,
 ) -> KnowledgeAddResponse:
     """Store user knowledge without spending extra LLM tokens for categorization."""
+    if not body.user_id and not get_settings().allow_global_knowledge_writes:
+        raise HTTPException(status_code=403, detail="Global knowledge writes are disabled.")
+
     raw_chunks = _split_text(body.text)
     if not raw_chunks:
         raise HTTPException(status_code=422, detail="Text is too short or contains no usable content.")
