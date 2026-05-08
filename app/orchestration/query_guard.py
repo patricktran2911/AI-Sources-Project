@@ -34,6 +34,14 @@ _BLOCK_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
         "guardrail_bypass",
         re.compile(r"\b(jailbreak|bypass\s+(the\s+)?guardrails?|disable\s+safety)\b", re.I),
     ),
+    (
+        "persona_scope_override",
+        re.compile(r"\b(act|pretend|behave)\s+as\s+(chatgpt|a\s+general\s+assistant|an?\s+unrestricted\s+assistant)\b", re.I),
+    ),
+    (
+        "persona_scope_override",
+        re.compile(r"\b(stop|quit)\s+(being|acting\s+as)\s+.{0,40}\bpersonal\s+ai\b", re.I),
+    ),
 )
 
 

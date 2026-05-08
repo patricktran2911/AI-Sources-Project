@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from app.contexts.context_registry import ContextRegistry
-from app.contexts.context_router import ContextRouter, _KEYWORD_HINTS, _forced_context
+from app.contexts.context_router import ContextRouter, _KEYWORD_HINTS, _forced_context, _forced_profile_context
 from app.contexts.knowledge_categorizer import infer_category
 from app.core.persona import normalize_first_person_answer
 from app.core.schemas import KnowledgeChunk, RerankResult, RetrievalResult
@@ -161,6 +161,19 @@ class TestPromptBuilder:
         assert "life story" in system_content
         assert "personal history" in system_content
 
+    def test_scope_rule_allows_practical_persona_guidance_without_becoming_chatgpt(self):
+        builder = PromptBuilder()
+        result = builder.build(
+            query="What should I know about weather, school, and job conversations with you?",
+            validated_chunks=[self._make_chunk("Patrick lives in Sacramento and is finishing Computer Science.")],
+            system_instruction="base",
+        )
+        system_content = result.messages[0]["content"]
+        assert "weather where they live" in system_content
+        assert "school" in system_content
+        assert "job search" in system_content
+        assert "Do not become a full general-purpose ChatGPT" in system_content
+
     def test_prompt_metrics_are_reported(self):
         builder = PromptBuilder()
         result = builder.build(
@@ -222,9 +235,18 @@ class TestContextRoutingHints:
         for expected in ("history", "story", "journey", "who are you"):
             assert expected in keywords
 
+    def test_profile_keywords_include_everyday_guidance_terms(self):
+        keywords = _KEYWORD_HINTS["profile"]
+        for expected in ("weather", "school", "job", "career", "what should i know"):
+            assert expected in keywords
+
     def test_forced_context_prefers_projects_for_project_showcase_question(self):
         query = "Which project best shows Patrick's product and engineering skills?"
         assert _forced_context(query.lower()) == "projects"
+
+    def test_forced_profile_context_handles_weather_school_and_job_guidance(self):
+        query = "What should I know about weather, school, and job questions?"
+        assert _forced_profile_context(query.lower()) == "profile"
 
 
 class TestContextRouter:

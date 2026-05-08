@@ -71,6 +71,30 @@ def test_chat_auto_routes_project_showcase_question_to_projects(client):
     assert resp.json()["meta"]["context"] == "projects"
 
 
+def test_chat_auto_allows_everyday_weather_school_job_guidance(client):
+    user_id = "u_everyday_guidance"
+    client.post(
+        "/api/v1/ai/knowledge/add",
+        json={
+            "user_id": user_id,
+            "context": "profile",
+            "text": "Patrick lives in Sacramento, studies Computer Science, and is open to software engineering jobs.",
+        },
+    )
+    resp = client.post(
+        "/api/v1/ai/chat",
+        json={
+            "message": "What should I know about weather, school, and job questions with you?",
+            "context": "auto",
+            "user_id": user_id,
+        },
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["meta"]["context"] == "profile"
+    assert body["data"]["supported"] is True
+
+
 def test_chat_portfolio_context(client):
     resp = client.post(
         "/api/v1/ai/chat",

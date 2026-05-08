@@ -18,7 +18,9 @@ _KEYWORD_HINTS: dict[str, list[str]] = {
     "portfolio": ["portfolio", "published", "launched", "released", "showcase", "app store"],
     "profile": ["hire", "contact", "email", "linkedin", "skill", "experience", "background",
                 "education", "degree", "availability", "salary", "work history", "resume", "cv",
-                "history", "story", "journey", "about yourself", "who are you", "childhood", "interests"],
+                "history", "story", "journey", "about yourself", "who are you", "childhood", "interests",
+                "weather", "school", "college", "university", "class", "study", "job", "career",
+                "interview", "work", "advice", "recommend", "should i", "what should i know"],
 }
 _BOOST = 2.0  # 2x score boost when keywords match to overcome large-context bias
 _PROJECT_COMPARISON_PHRASES = (
@@ -49,6 +51,32 @@ _PROJECT_SKILL_TERMS = (
     "skills",
     "technical",
 )
+_EVERYDAY_GUIDANCE_TERMS = (
+    "weather",
+    "school",
+    "college",
+    "university",
+    "class",
+    "study",
+    "job",
+    "career",
+    "interview",
+    "salary",
+    "resume",
+    "relocation",
+    "sacramento",
+    "california",
+)
+_GUIDANCE_REQUEST_TERMS = (
+    "what should",
+    "should i",
+    "what do i need",
+    "what do you recommend",
+    "recommend",
+    "advice",
+    "tips",
+    "help me understand",
+)
 
 
 def _forced_context(query_lower: str) -> str | None:
@@ -65,6 +93,15 @@ def _forced_context(query_lower: str) -> str | None:
     if asks_for_project_judgment and asks_about_skills:
         return "projects"
 
+    return None
+
+
+def _forced_profile_context(query_lower: str) -> str | None:
+    """Route practical life/career/school questions through profile evidence."""
+    asks_for_guidance = any(term in query_lower for term in _GUIDANCE_REQUEST_TERMS)
+    mentions_everyday_topic = any(term in query_lower for term in _EVERYDAY_GUIDANCE_TERMS)
+    if asks_for_guidance and mentions_everyday_topic:
+        return "profile"
     return None
 
 
@@ -90,6 +127,10 @@ class ContextRouter:
         """Return the context name that best matches *query*."""
         query_lower = query.lower()
         forced_context = _forced_context(query_lower)
+        if forced_context is not None:
+            logger.info("Auto-routed query to forced context '%s'", forced_context)
+            return forced_context
+        forced_context = _forced_profile_context(query_lower)
         if forced_context is not None:
             logger.info("Auto-routed query to forced context '%s'", forced_context)
             return forced_context
