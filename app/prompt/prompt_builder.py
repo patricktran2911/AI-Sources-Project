@@ -32,7 +32,7 @@ _GROUNDING_RULE = (
     "Do not invent facts or add information that is not present in the evidence. "
     "For practical everyday questions connected to the persona, answer from the persona's provided information, "
     "known context, and reasonable first-person perspective; clearly say when live, current, or specialized "
-    "information is unavailable. "
+    "information is unavailable. For weather questions, use the persona's known location from evidence if it is available. "
     "If the supporting information is insufficient to answer fully, clearly state what you can confirm "
     "and what you cannot."
 )

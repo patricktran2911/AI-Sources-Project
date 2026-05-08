@@ -33,6 +33,10 @@ from app.validation.relevance_validator import RelevanceValidator
 
 logger = logging.getLogger(__name__)
 
+_PRACTICAL_PROFILE_RETRIEVAL_HINT = (
+    "profile location city timezone school education job career current work preferences perspective"
+)
+
 
 class Orchestrator:
     """Single entry point for all incoming AI requests."""
@@ -85,6 +89,8 @@ class Orchestrator:
 
         history: list[dict[str, str]] = request.options.get("history", [])
         retrieval_query = self._enrich_query(request.query, history)
+        if request.context == "profile" and is_practical_profile_query(request.query):
+            retrieval_query = f"{retrieval_query} {_PRACTICAL_PROFILE_RETRIEVAL_HINT}"
 
         if self._hybrid is not None:
             retrieved = self._hybrid.retrieve(retrieval_query, chunks)

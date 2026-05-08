@@ -176,6 +176,7 @@ class TestPromptBuilder:
         )
         system_content = result.messages[0]["content"]
         assert "weather where they live" in system_content
+        assert "known location" in system_content
         assert "school" in system_content
         assert "job search" in system_content
         assert "Do not become a full general-purpose ChatGPT" in system_content
