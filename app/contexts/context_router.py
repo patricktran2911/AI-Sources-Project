@@ -77,6 +77,25 @@ _GUIDANCE_REQUEST_TERMS = (
     "tips",
     "help me understand",
 )
+_PERSONAL_PERSPECTIVE_TERMS = (
+    "what do you think",
+    "what would you",
+    "how would you",
+    "what are you thinking",
+    "your opinion",
+    "from your perspective",
+)
+
+
+def is_practical_profile_query(query: str) -> bool:
+    """Return whether a query should be answered from persona context."""
+    query_lower = query.lower()
+    asks_for_guidance = any(term in query_lower for term in _GUIDANCE_REQUEST_TERMS)
+    mentions_everyday_topic = any(term in query_lower for term in _EVERYDAY_GUIDANCE_TERMS)
+    asks_for_personal_perspective = any(term in query_lower for term in _PERSONAL_PERSPECTIVE_TERMS)
+    return mentions_everyday_topic or asks_for_personal_perspective or (
+        asks_for_guidance and mentions_everyday_topic
+    )
 
 
 def _forced_context(query_lower: str) -> str | None:
@@ -98,9 +117,7 @@ def _forced_context(query_lower: str) -> str | None:
 
 def _forced_profile_context(query_lower: str) -> str | None:
     """Route practical life/career/school questions through profile evidence."""
-    asks_for_guidance = any(term in query_lower for term in _GUIDANCE_REQUEST_TERMS)
-    mentions_everyday_topic = any(term in query_lower for term in _EVERYDAY_GUIDANCE_TERMS)
-    if asks_for_guidance and mentions_everyday_topic:
+    if is_practical_profile_query(query_lower):
         return "profile"
     return None
 

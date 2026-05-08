@@ -7,7 +7,13 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from app.contexts.context_registry import ContextRegistry
-from app.contexts.context_router import ContextRouter, _KEYWORD_HINTS, _forced_context, _forced_profile_context
+from app.contexts.context_router import (
+    ContextRouter,
+    _KEYWORD_HINTS,
+    _forced_context,
+    _forced_profile_context,
+    is_practical_profile_query,
+)
 from app.contexts.knowledge_categorizer import infer_category
 from app.core.persona import normalize_first_person_answer
 from app.core.schemas import KnowledgeChunk, RerankResult, RetrievalResult
@@ -213,6 +219,17 @@ class TestPromptBuilder:
         )
         assert answer == "I can only help with questions about me. Try asking about my background."
 
+    def test_normalize_first_person_answer_preserves_identity_names(self):
+        answer = normalize_first_person_answer(
+            "I'm Phuc Tran, also known as Patrick Tran.I'm an iOS and full-stack software engineer.",
+            "Who are you?",
+        )
+        assert "I Tran" not in answer
+        assert "known as I" not in answer
+        assert "Phuc Tran" in answer
+        assert "Patrick Tran" in answer
+        assert "Patrick Tran. I'm" in answer
+
     def test_normalize_first_person_answer_preserves_explicit_third_person(self):
         answer = normalize_first_person_answer(
             "Patrick is a full-stack engineer.",
@@ -247,6 +264,14 @@ class TestContextRoutingHints:
     def test_forced_profile_context_handles_weather_school_and_job_guidance(self):
         query = "What should I know about weather, school, and job questions?"
         assert _forced_profile_context(query.lower()) == "profile"
+
+    def test_forced_profile_context_handles_plain_weather_question(self):
+        query = "How's the weather today?"
+        assert _forced_profile_context(query.lower()) == "profile"
+        assert is_practical_profile_query(query) is True
+
+    def test_practical_profile_query_handles_personal_perspective(self):
+        assert is_practical_profile_query("What do you think about moving for a job?") is True
 
 
 class TestContextRouter:

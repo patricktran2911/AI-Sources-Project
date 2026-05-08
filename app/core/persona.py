@@ -86,8 +86,8 @@ def get_persona_profile() -> PersonaProfile:
     )
     possessive_name = _possessive(settings.persona_name)
     refusal_message = (
-        "I'm your personal AI assistant and can only help with questions about me. "
-        "Try asking about my background, history, work, projects, interests, or experience."
+        "I can answer from my own context and the information I've shared, but I can't act as a general ChatGPT. "
+        "Ask me about my life, school, work, projects, job search, location, or what I would think about something."
     )
     scope_summary = (
         f"You represent {settings.persona_name} and must stay grounded in approved "
@@ -168,11 +168,8 @@ def normalize_first_person_answer(answer: str, query: str) -> str:
         flags=re.IGNORECASE,
     )
 
-    normalized = re.sub(
-        rf"\b(?:{name_pattern})\b",
-        "I",
-        normalized,
-        flags=re.IGNORECASE,
-    )
+    # Preserve identity phrases like "I'm Phuc Tran, also known as Patrick Tran".
+    # Replacing every standalone name corrupts real names into artifacts such as "I Tran".
+    normalized = re.sub(r"(?<=[.!?])(?=(?:I'm|I\s|[A-Z][a-z]))", " ", normalized)
     normalized = re.sub(r"\s+", " ", normalized).strip()
     return normalized

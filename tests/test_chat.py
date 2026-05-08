@@ -95,6 +95,30 @@ def test_chat_auto_allows_everyday_weather_school_job_guidance(client):
     assert body["data"]["supported"] is True
 
 
+def test_chat_auto_allows_plain_weather_question(client):
+    user_id = "u_plain_weather"
+    client.post(
+        "/api/v1/ai/knowledge/add",
+        json={
+            "user_id": user_id,
+            "context": "profile",
+            "text": "Patrick lives in Sacramento, California and answers practical questions from that local context.",
+        },
+    )
+    resp = client.post(
+        "/api/v1/ai/chat",
+        json={
+            "message": "How's the weather today?",
+            "context": "auto",
+            "user_id": user_id,
+        },
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["meta"]["context"] == "profile"
+    assert body["data"]["supported"] is True
+
+
 def test_chat_portfolio_context(client):
     resp = client.post(
         "/api/v1/ai/chat",

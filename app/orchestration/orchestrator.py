@@ -18,12 +18,12 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 from app.contexts.context_registry import ContextRegistry
-from app.contexts.context_router import ContextRouter
+from app.contexts.context_router import ContextRouter, is_practical_profile_query
 from app.contexts.intent_classifier import INTENT_PROMPT_HINTS, classify_intent
 from app.core.config import get_settings
 from app.core.exceptions import ContextNotFoundError, FeatureNotFoundError
 from app.core.persona import get_persona_profile
-from app.core.schemas import AIRequest, AIResponse
+from app.core.schemas import AIRequest, AIResponse, RerankResult
 from app.features.registry import FeatureRegistry
 from app.orchestration.query_guard import guard_query
 from app.repository.knowledge_repo import KnowledgeRepository
@@ -92,6 +92,17 @@ class Orchestrator:
             retrieved = self._retriever.retrieve(retrieval_query, chunks)
 
         validated = self._validator.validate(request.query, retrieved)
+        if (
+            not validated
+            and request.context == "profile"
+            and is_practical_profile_query(request.query)
+            and retrieved
+        ):
+            logger.info("Using top profile evidence for practical persona query: %s", request.query[:120])
+            validated = [
+                RerankResult(chunk=result.chunk, score=result.score)
+                for result in retrieved[: get_settings().rerank_top_k]
+            ]
 
         if not validated:
             logger.warning("No relevant data after validation gate for query: %s", request.query)
