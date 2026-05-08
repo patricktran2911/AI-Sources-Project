@@ -15,7 +15,7 @@ from app.contexts.context_router import (
     is_practical_profile_query,
 )
 from app.contexts.knowledge_categorizer import infer_category
-from app.core.persona import normalize_first_person_answer
+from app.core.persona import get_persona_profile, normalize_first_person_answer
 from app.core.schemas import KnowledgeChunk, RerankResult, RetrievalResult
 from app.features.session_store import SessionStore
 from app.prompt.prompt_builder import PromptBuilder
@@ -215,10 +215,18 @@ class TestPromptBuilder:
 
     def test_normalize_first_person_answer_uses_me_after_preposition(self):
         answer = normalize_first_person_answer(
-            "I can only help with questions about Patrick. Try asking about Patrick's background.",
+            "I'm Patrick's AI representative. I can only help with questions about Patrick. Try asking about Patrick's background.",
             "What is the weather?",
         )
-        assert answer == "I can only help with questions about me. Try asking about my background."
+        assert answer == (
+            "I'm Patrick's AI representative. "
+            "I can only help with questions about me. Try asking about my background."
+        )
+
+    def test_refusal_message_uses_patricks_ai_voice(self):
+        message = get_persona_profile().refusal_message
+        assert message.startswith("I'm Patrick's AI representative.")
+        assert "your personal AI assistant" not in message
 
     def test_normalize_first_person_answer_preserves_identity_names(self):
         answer = normalize_first_person_answer(

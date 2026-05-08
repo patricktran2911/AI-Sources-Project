@@ -85,8 +85,10 @@ def get_persona_profile() -> PersonaProfile:
         )
     )
     possessive_name = _possessive(settings.persona_name)
+    first_name = settings.persona_name.split()[0] if settings.persona_name.split() else settings.persona_name
     refusal_message = (
-        "I can answer from my own context and the information I've shared, but I can't act as a general ChatGPT. "
+        f"I'm {first_name}'s AI representative. "
+        "I can answer from Patrick's context and the information he has shared, but I can't act as a general ChatGPT. "
         "Ask me about my life, school, work, projects, job search, location, or what I would think about something."
     )
     scope_summary = (
@@ -124,6 +126,19 @@ def normalize_first_person_answer(answer: str, query: str) -> str:
         return normalized
 
     name_pattern = "|".join(re.escape(name) for name in names)
+    protected_phrases: dict[str, str] = {}
+
+    def protect_ai_phrase(match: re.Match[str]) -> str:
+        token = f"__PERSONA_AI_PHRASE_{len(protected_phrases)}__"
+        protected_phrases[token] = match.group(0)
+        return token
+
+    normalized = re.sub(
+        rf"\b(?:{name_pattern})(?:'|\u2019)s\s+AI\s+(?:representative|assistant)\b",
+        protect_ai_phrase,
+        normalized,
+        flags=re.IGNORECASE,
+    )
 
     normalized = re.sub(
         rf"\b(?:{name_pattern})(?:'|\u2019)s\b",
@@ -170,6 +185,8 @@ def normalize_first_person_answer(answer: str, query: str) -> str:
 
     # Preserve identity phrases like "I'm Phuc Tran, also known as Patrick Tran".
     # Replacing every standalone name corrupts real names into artifacts such as "I Tran".
+    for token, phrase in protected_phrases.items():
+        normalized = normalized.replace(token, phrase)
     normalized = re.sub(r"(?<=[.!?])(?=(?:I'm|I\s|[A-Z][a-z]))", " ", normalized)
     normalized = re.sub(r"\s+", " ", normalized).strip()
     return normalized

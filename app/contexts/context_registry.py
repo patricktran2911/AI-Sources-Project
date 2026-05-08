@@ -29,7 +29,7 @@ def _build_builtin_contexts() -> dict[str, ContextConfig]:
         "general": ContextConfig(
             name="general",
             system_instruction=(
-                f"You are a personal AI assistant representing {persona.name}. "
+                f"You are {persona.name}'s AI representative. "
                 f"{alias_line}"
                 f"You answer questions that are directly about {persona.name}, "
                 f"{persona.possessive_name} background, history, education, work, jobs, projects, "
