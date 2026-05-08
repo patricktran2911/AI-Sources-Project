@@ -16,6 +16,6 @@ def test_info(client):
     assert resp.status_code == 200
     data = resp.json()
     assert "app" in data
-    assert "version" in data
+    assert data["version"] == "0.3.0"
     assert "llm_provider" in data
     assert "persona_name" in data

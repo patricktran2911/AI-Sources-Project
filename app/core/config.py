@@ -9,7 +9,7 @@ class Settings(BaseSettings):
 
     # --- Application ---
     app_name: str = "Personal AI Representative"
-    app_version: str = "0.2.0"
+    app_version: str = "0.3.0"
     debug: bool = False
     app_api_key: str = ""
     cors_allow_origins: str = "http://localhost:8000,http://127.0.0.1:8000"
